@@ -1,5 +1,6 @@
 import moment from "moment";
 import React, { useState, useEffect, useRef } from "react";
+import { Pressable } from "react-native";
 import { ImageBackground, View, ScrollView, FlatList, Image, Alert } from "react-native";
 import {
   Button,
@@ -26,10 +27,24 @@ import ImageUpload from "../../Components/ImageUpload";
 import { postRequest, uploadImage } from "../../Services/RequestServices";
 import MyStyles from "../../Styles/MyStyles";
 import DatePicker from "../../Components/DatePicker";
+import RedeemModal from "./RedeemModal";
 
 const Dashboard = (props) => {
   const { branchId, branchName, logoPath, token } = props.loginDetails;
   const imageRef = useRef(null);
+  const [category, setCategory] = useState({
+    scooter: false,
+    motorcycle: true,
+  });
+  const toggleCategory = (type: 'scooter' | 'motorcycle') => {
+    setCategory((prev) => ({ ...prev, [type]: !prev[type] }));
+  };
+  const options = [
+    { label: 'YES', value: 'yes' },
+    { label: 'FOLLOW UP', value: 'followup' },
+    { label: 'REQUIREMENT', value: 'requirement' },
+  ];
+  const [interest, setInterest] = useState('yes');
   const [details, setDetails] = useState(null);
   const [history, setHistory] = useState([]);
   const [tabs, setTabs] = useState(1);
@@ -39,7 +54,25 @@ const Dashboard = (props) => {
   const [notifications, setNotifications] = useState([]);
   const [redeem, setRedeem] = useState(null);
   const [checkIn, setCheckIn] = useState(null);
+  const [voucherList, setVoucherList] = useState(null);
   const [upload, setUpload] = useState(null);
+  const [points, setPoints] = useState(null);
+  const [customerId, setCustomerId] = useState(null);
+  const subCategoryData =
+    category === "SCOOTER"
+      ? [
+        { label: "JUPITER", value: "JUPITER" },
+        { label: "PEP", value: "PEP" },
+      ]
+      : [
+        { label: "APACHE", value: "APACHE" },
+        { label: "SPORTS", value: "SPORTS" },
+      ];
+  const imageUrl =
+    category === "SCOOTER"
+      ? "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png"
+      : "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg";
+
   const [join, setJoin] = useState({
     customer_id: "0",
     branch_id: branchId,
@@ -68,6 +101,7 @@ const Dashboard = (props) => {
     join: false,
     checkIn: false,
     upload: false,
+    uploadNext: false,
     notification: false,
     area: false,
   });
@@ -77,7 +111,7 @@ const Dashboard = (props) => {
   const [recentVistors, setRecentVistors] = useState([]);
   const [bannerImages, setBannerImages] = useState([]);
   const [imageUri, setImageUri] = useState(
-    "https://jewellerapi.quickgst.in/tabBanner/image-d7e532c1-6f79-4f06-ae1d-9afd4567940f.jpg"
+    "https://api.quicktagg.com/tabBanner/image-d7e532c1-6f79-4f06-ae1d-9afd4567940f.jpg"
   );
 
   useEffect(() => {
@@ -90,7 +124,7 @@ const Dashboard = (props) => {
           return item.url + item.image_path;
         });
         setBannerImages(data);
-        
+
         setImageUri(data[0]);
       }
     });
@@ -380,7 +414,7 @@ const Dashboard = (props) => {
                     name="phone"
                   />
                 }
-                //  left={<TextInput.Affix text="+91-" />}
+              //  left={<TextInput.Affix text="+91-" />}
               />
               {recentVistors.map((item, index) => (
                 <List.Item
@@ -731,8 +765,8 @@ const Dashboard = (props) => {
             {/*------------ My Design Tab ------------------- */}
 
             {tabs === 1 && (
-               
-              <Swiper  showsButtons showsPagination={false}>
+
+              <Swiper showsButtons showsPagination={false}>
                 {design.map((item, index) => {
                   return (
                     <View style={[MyStyles.row, { flex: 1 }]} key={index}>
@@ -748,32 +782,32 @@ const Dashboard = (props) => {
                         ]}
                       />
                       <View style={{ flex: 1, marginLeft: 10 }}>
-                      <ScrollView>
-                        <View style={MyStyles.wrapper}>
-                          <Text>SKU</Text>
-                          <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Remarks</Text>
-                          <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Staff</Text>
-                          <Text style={MyStyles.text}>
-                            {item.staff_name ? item.staff_name : "N/A"}
-                          </Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Date</Text>
-                          <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
-                        </View>
-                    </ScrollView>
+                        <ScrollView>
+                          <View style={MyStyles.wrapper}>
+                            <Text>SKU</Text>
+                            <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Remarks</Text>
+                            <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Staff</Text>
+                            <Text style={MyStyles.text}>
+                              {item.staff_name ? item.staff_name : "N/A"}
+                            </Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Date</Text>
+                            <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
+                          </View>
+                        </ScrollView>
                       </View>
                     </View>
                   );
                 })}
               </Swiper>
-              
+
             )}
 
             {/*------------ Wishlist Tab ------------------- */}
@@ -795,25 +829,25 @@ const Dashboard = (props) => {
                         ]}
                       />
                       <View style={{ flex: 1, marginLeft: 10 }}>
-                      <ScrollView>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Product Name</Text>
-                          <Text style={MyStyles.text}>
-                            {item.product_name ? item.product_name : "N/A"}
-                          </Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>SKU</Text>
-                          <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Remarks</Text>
-                          <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Date</Text>
-                          <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
-                        </View>
+                        <ScrollView>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Product Name</Text>
+                            <Text style={MyStyles.text}>
+                              {item.product_name ? item.product_name : "N/A"}
+                            </Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>SKU</Text>
+                            <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Remarks</Text>
+                            <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Date</Text>
+                            <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
+                          </View>
                         </ScrollView>
                       </View>
                     </View>
@@ -841,25 +875,25 @@ const Dashboard = (props) => {
                         ]}
                       />
                       <View style={{ flex: 1, marginLeft: 10 }}>
-                      <ScrollView>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Product Name</Text>
-                          <Text style={MyStyles.text}>
-                            {item.product_name ? item.product_name : "N/A"}
-                          </Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>SKU</Text>
-                          <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Remarks</Text>
-                          <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
-                        </View>
-                        <View style={MyStyles.wrapper}>
-                          <Text>Date</Text>
-                          <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
-                        </View>
+                        <ScrollView>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Product Name</Text>
+                            <Text style={MyStyles.text}>
+                              {item.product_name ? item.product_name : "N/A"}
+                            </Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>SKU</Text>
+                            <Text style={MyStyles.text}>{item.sku ? item.sku : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Remarks</Text>
+                            <Text style={MyStyles.text}>{item.remarks ? item.remarks : "N/A"}</Text>
+                          </View>
+                          <View style={MyStyles.wrapper}>
+                            <Text>Date</Text>
+                            <Text style={MyStyles.text}>{item.date ? item.date : "N/A"}</Text>
+                          </View>
                         </ScrollView>
                       </View>
                     </View>
@@ -925,14 +959,14 @@ const Dashboard = (props) => {
                     name="phone"
                   />
                 }
-                //  left={<TextInput.Affix text="+91-" />}
+              //  left={<TextInput.Affix text="+91-" />}
               />
               {recentVistors.map((item, index) => (
                 <List.Item
                   onPress={() => {
                     setModal({ ...modal, mobile: item.mobile });
                   }}
-                  
+
                   key={index}
                   title={"+91 " + item.mobile}
                   left={(props) => <List.Icon {...props} icon="history" />}
@@ -962,17 +996,38 @@ const Dashboard = (props) => {
                       token
                     ).then((resp) => {
                       if (resp.status == 200) {
+                        console.log("voucherList", resp.data);
+                        const customerData = resp.data[0];
+                        setVoucherList(customerData);
+                        setCustomerId(customerData.customer_id);
+                  
+                        // First: Fetch customer points
                         postRequest(
-                          "customervisit/getCustomerVoucherList",
+                          "customervisit/getCustomerPointList",
                           {
-                            customer_id: resp.data[0].customer_id,
+                            customer_id: customerData.customer_id,
                             branch_id: branchId,
                           },
                           token
-                        ).then((resp) => {
-                          if (resp.status == 200) {
-                            console.log(resp.data)
-                            setRedeem(resp.data);
+                        ).then((pointResp) => {
+                          if (pointResp.status === 200) {
+                            console.log("Customer points:", pointResp.data);
+                            setPoints(pointResp.data[0]);
+                            // Second: Fetch voucher list
+                            postRequest(
+                              "customervisit/getCustomerVoucherList",
+                              {
+                                customer_id: customerData.customer_id,
+                                branch_id: branchId,
+                              },
+                              token
+                            ).then((voucherResp) => {
+                              if (voucherResp.status === 200) {
+                                console.log("redeem", voucherResp.data);
+                                setRedeem(voucherResp.data);
+                                setModal({ ...modal, redeem: true });
+                              }
+                            });
                           }
                         });
                       }
@@ -984,130 +1039,7 @@ const Dashboard = (props) => {
               </View>
             </View>
           ) : (
-            <View>
-              <DataTable style={{ height: "100%" }}>
-                <DataTable.Header>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Voucher
-                  </DataTable.Title>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Details
-                  </DataTable.Title>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Offer
-                  </DataTable.Title>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Issue Date
-                  </DataTable.Title>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Expiry Date
-                  </DataTable.Title>
-                  <DataTable.Title
-                    style={{ flex: 1, justifyContent: "center" }}
-                    theme={{ colors: { text: "#0818A8" } }}
-                  >
-                    Action
-                  </DataTable.Title>
-                </DataTable.Header>
-                <FlatList
-                  data={redeem}
-                  renderItem={({ item, index }) => (
-                    <DataTable.Row>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        {item.voucher_name}
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        {item.details}
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        {item.amount}
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        {moment(item.redeem_start_date).format("DD/MM/YYYY")}
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        {moment(item.redeem_end_date).format("DD/MM/YYYY")}
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1, justifyContent: "center" }}>
-                        <Button
-                          mode="contained"
-                          compact
-                          uppercase={false}
-                          color="#ffba3c"
-                          onPress={() => {
-                            Alert.alert(
-                              "Are You Sure ?",
-                              "You Want to Redeem this Voucher !",
-                              [
-                                {
-                                  text: "No",
-
-                                  style: "cancel",
-                                },
-                                {
-                                  text: "Yes",
-                                  onPress: () => {
-                                    postRequest(
-                                      "customervisit/insertVoucherRedeem",
-                                      {
-                                        tran_id: "0",
-                                        customer_id: item.customer_id,
-                                        voucher_id: item.voucher_id,
-                                      },
-                                      token
-                                    ).then((resp) => {
-                                      if (resp.status == 200) {
-                                        Alert.alert("Success", "Voucher Redeemed..!");
-                                        setModal({ ...modal, redeem: false });
-                                        setRedeem(null);
-                                      }
-                                    });
-                                  },
-                                },
-                              ],
-                              { cancelable: false }
-                            );
-                          }}
-                        >
-                          Redeem
-                        </Button>
-                      </DataTable.Cell>
-                    </DataTable.Row>
-                  )}
-                  keyExtractor={(item, index) => index.toString()}
-                />
-                <View style={[MyStyles.row, { marginTop: 10, justifyContent: "flex-end" }]}>
-                  <Button
-                    style={{ marginRight: "auto" }}
-                    mode="contained"
-                    color="#DC143C"
-                    uppercase={false}
-                    compact
-                    onPress={() => {
-                      setModal({ ...modal, redeem: false });
-                      setRedeem(null);
-                    }}
-                  >
-                    Close
-                  </Button>
-                </View>
-              </DataTable>
-            </View>
+            <RedeemModal visible={modal.redeem} onClose={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null); setVoucherList(null);}} points={points} redeem={redeem} voucherList={voucherList}/>
           )
         }
       />
@@ -1433,7 +1365,7 @@ const Dashboard = (props) => {
                     name="phone"
                   />
                 }
-                //  left={<TextInput.Affix text="+91-" />}
+              //  left={<TextInput.Affix text="+91-" />}
               />
               {recentVistors.map((item, index) => (
                 <List.Item
@@ -1525,56 +1457,56 @@ const Dashboard = (props) => {
                 </Text>
               </View>
               <View style={[MyStyles.row,
-            {
-              justifyContent: "space-between",
-              margin: 0,
-              paddingHorizontal: 40,
-            },]}>
-                 <Card
-            style={[MyStyles.primaryColor, { width: "60%", borderRadius: 10 }]}
-            onPress={() => setModal({ ...modal, checkIn: true })}
-          >
-            <ImageBackground
-              style={{}}
-              imageStyle={{ borderRadius: 10, opacity: 0.5 }}
-              source={require("../../assets/pattern.jpg")}
-            >
-              {/* <Card.Title
+              {
+                justifyContent: "space-between",
+                margin: 0,
+                paddingHorizontal: 40,
+              },]}>
+                <Card
+                  style={[MyStyles.primaryColor, { width: "60%", borderRadius: 10 }]}
+                  onPress={() => setModal({ ...modal, checkIn: true })}
+                >
+                  <ImageBackground
+                    style={{}}
+                    imageStyle={{ borderRadius: 10, opacity: 0.5 }}
+                    source={require("../../assets/pattern.jpg")}
+                  >
+                    {/* <Card.Title
                 title={`Join ${branchName} Now`}
                 subtitle="Accounts are free"
                 right={() => <IconButton icon="chevron-right" size={30} />}
               /> */}
-              <View style={{ paddingVertical: 15 }}>
-                <Text
-                  style={{ fontSize: 22, textAlign: "center" }}
-                  numberOfLines={1}
-                >{checkIn.customer_name}</Text>
-              </View>
-            </ImageBackground>
-          </Card>
-          <Card
-            style={[MyStyles.secondaryColor, { width: "35%", borderRadius: 10 }]}
-            onPress={() => setModal({ ...modal, checkIn: true })}
-          >
-            <ImageBackground
-              style={{}}
-              imageStyle={{ borderRadius: 10, opacity: 0.5 }}
-              source={require("../../assets/pattern.jpg")}
-            >
-              {/* <Card.Title
+                    <View style={{ paddingVertical: 15 }}>
+                      <Text
+                        style={{ fontSize: 22, textAlign: "center" }}
+                        numberOfLines={1}
+                      >{checkIn.customer_name}</Text>
+                    </View>
+                  </ImageBackground>
+                </Card>
+                <Card
+                  style={[MyStyles.secondaryColor, { width: "35%", borderRadius: 10 }]}
+                  onPress={() => setModal({ ...modal, checkIn: true })}
+                >
+                  <ImageBackground
+                    style={{}}
+                    imageStyle={{ borderRadius: 10, opacity: 0.5 }}
+                    source={require("../../assets/pattern.jpg")}
+                  >
+                    {/* <Card.Title
                 title="Check In"
                 subtitle="for Rewards"
                 right={() => <IconButton icon="chevron-right" size={30} />}
               /> */}
-               
-              <View style={{ paddingVertical: 15 }}>
-                <Text style={{ fontSize: 22, textAlign: "center" }} numberOfLines={1}>
-                {checkIn.total_visit}
-                </Text>
-                
-              </View>
-            </ImageBackground>
-          </Card>
+
+                    <View style={{ paddingVertical: 15 }}>
+                      <Text style={{ fontSize: 22, textAlign: "center" }} numberOfLines={1}>
+                        {checkIn.total_visit}
+                      </Text>
+
+                    </View>
+                  </ImageBackground>
+                </Card>
                 {/* <Card style={[MyStyles.primaryColor, { width: "60%", borderRadius: 10 }]}>
                   <ImageBackground
                     style={{ flex: 1 }}
@@ -1638,7 +1570,7 @@ const Dashboard = (props) => {
                     name="phone"
                   />
                 }
-                //  left={<TextInput.Affix text="+91-" />}
+              //  left={<TextInput.Affix text="+91-" />}
               />
               {recentVistors.map((item, index) => (
                 <List.Item
@@ -1687,6 +1619,7 @@ const Dashboard = (props) => {
                           image_data: "",
                           uri: require("../../assets/upload.png"),
                         });
+                        console.log(resp.data);
                       }
                     });
                   }}
@@ -1700,64 +1633,70 @@ const Dashboard = (props) => {
               <ScrollView>
                 <View style={MyStyles.row}>
                   <View style={{ flex: 1, paddingHorizontal: 10 }}>
-                    <TextInput
-                      mode="flat"
-                      style={{ backgroundColor: "rgba(0,0,0,0)" }}
-                      label="Name"
-                      value={upload?.full_name}
-                      disabled
-                    />
-                    <TextInput
-                      mode="flat"
-                      style={{ backgroundColor: "rgba(0,0,0,0)" }}
-                      label="Mobile No."
-                      value={upload?.mobile}
-                      disabled
-                    />
-                    <TextInput
-                      mode="flat"
-                      style={{ backgroundColor: "rgba(0,0,0,0)" }}
-                      label="Remarks"
-                      value={upload?.remarks}
-                      onChangeText={(text) => setUpload({ ...upload, remarks: text })}
-                    />
-                    <DropDown
-                      value={upload?.staff_id}
-                      ext_lbl="name"
-                      ext_val="staff_id"
-                      data={staffList}
-                      placeholder="Staff"
-                      onChange={(val) => setUpload({ ...upload, staff_id: val })}
-                    />
-                    <TextInput
-                      mode="flat"
-                      style={{ backgroundColor: "rgba(0,0,0,0)" }}
-                      label="Sku"
-                      value={upload?.sku}
-                      onChangeText={(text) => setUpload({ ...upload, sku: text })}
-                    />
-                  </View>
-                  <View style={{ flex: 1, paddingHorizontal: 10 }}>
-                    <ImageUpload
-                      source={upload?.uri}
-                      onClearImage={() =>
-                        setUpload({
-                          ...upload,
-                          image_path: "",
-                          image_data: "",
-                          uri: require("../../assets/upload.png"),
-                        })
-                      }
-                      onUploadImage={(file) => {
-                        //console.log(file.base64)
-                        setUpload({
-                          ...upload,
-                          image_path: `image-${Date.now()}.jpeg`,
-                          image_data: file.base64,
-                          uri: { uri: file.uri },
-                        });
-                      }}
-                    />
+                    <View style={MyStyles.row}>
+                      <TextInput
+                        mode="flat"
+                        style={{ backgroundColor: "rgba(0,0,0,0)" }}
+                        label="Name"
+                        value={upload?.full_name}
+                        disabled
+                      />
+                      <TextInput
+                        mode="flat"
+                        style={{ backgroundColor: "rgba(0,0,0,0)" }}
+                        label="Mobile No."
+                        value={upload?.mobile}
+                        disabled
+                      />
+
+                      <DropDown
+                        value={upload?.staff_id}
+                        ext_lbl="name"
+                        ext_val="staff_id"
+                        data={staffList}
+                        placeholder="Staff"
+                        onChange={(val) => setUpload({ ...upload, staff_id: val })}
+                        style={MyStyles.dropdown} // try this
+                      // or containerStyle={MyStyles.dropdownContainer} depending on what your component supports
+                      />
+                    </View>
+
+
+                    <Text style={[MyStyles.sectionLabel, { marginTop: 16 }]}>Category</Text>
+                    <View style={MyStyles.checkboxContainer}>
+                      <Pressable onPress={() => toggleCategory('scooter')} style={MyStyles.checkboxRow}>
+                        <View style={[MyStyles.checkbox, category.scooter && MyStyles.checked]}>
+                          {category.scooter && <Text style={MyStyles.tick}>✓</Text>}
+                        </View>
+                        <Text style={MyStyles.checkboxLabel}>SCOOTER</Text>
+                      </Pressable>
+
+                      <Pressable onPress={() => toggleCategory('motorcycle')} style={MyStyles.checkboxRow}>
+                        <View style={[MyStyles.checkbox, category.motorcycle && MyStyles.checked]}>
+                          {category.motorcycle && <Text style={MyStyles.tick}>✓</Text>}
+                        </View>
+                        <Text style={MyStyles.checkboxLabel}>MOTORCYCLE</Text>
+                      </Pressable>
+                      <View></View>
+                    </View>
+
+                    <Text style={MyStyles.sectionLabel}>Interest</Text>
+                    <View style={MyStyles.radioContainer}>
+                      {['yes', 'followup', 'requirement'].map((item) => (
+                        <Pressable
+                          key={item}
+                          onPress={() => setInterest(item)}
+                          style={MyStyles.radioRow}
+                        >
+                          <View style={interest === item ? MyStyles.radioSelected : MyStyles.radio} />
+                          <Text style={MyStyles.radioLabel}>
+                            {item === 'yes' ? 'Yes' : item === 'followup' ? 'Follow Up' : 'Requirement'}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+
+
                   </View>
                 </View>
               </ScrollView>
@@ -1772,7 +1711,7 @@ const Dashboard = (props) => {
                     setUpload(null);
                   }}
                 >
-                  Close
+                  CANCEL
                 </Button>
                 <Button
                   mode="contained"
@@ -1780,35 +1719,228 @@ const Dashboard = (props) => {
                   uppercase={false}
                   compact
                   onPress={() => {
-                    postRequest(
-                      "customervisit/UploadCustomerImageMob",
-                      {
-                        base64image: upload.image_data,
-                        imageName: upload.image_path,
-                      },
-                      token
-                    ).then((resp) => {
-                      if (resp.status == 200) {
-                        postRequest("customervisit/insertCustomerUpload", upload, token).then(
-                          (resp) => {
-                            //console.log(resp);
-                            if (resp.status == 200) {
-                              setModal({ ...modal, upload: false });
-                              setUpload(null);
-                            }
-                          }
-                        );
-                      }
-                    });
+                    setModal({ ...modal, uploadNext: true, checkIn: false, upload: false });
                   }}
                 >
-                  Continue
+                  NEXT
                 </Button>
               </View>
             </View>
           )
         }
       />
+
+      {/*------------ Upload Next Modal ------------------- */}
+      <CustomModal
+        visible={modal.uploadNext}
+        content={
+          <View style={{ height: "100%" }}>
+            <ScrollView>
+              <View style={[MyStyles.row, { justifyContent: "space-around" }]}>
+                {["scooter", "motorcycle"].map((catkey) =>
+                  category[catkey] ? (
+                    <View key={catkey} style={{ flex: 0.48 }}>
+                      <Text
+                        style={{
+                          backgroundColor: "#eee",
+                          textAlign: "center",
+                          paddingVertical: 6,
+                          fontWeight: "bold",
+                          color: "#999",
+                          borderTopLeftRadius: 6,
+                          borderTopRightRadius: 6,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Category{'\n'}
+                        <Text style={{ fontSize: 18, color: "#333" }}>
+                          {catkey.toUpperCase()}
+                        </Text>
+                      </Text>
+
+                      {/* File Picker Button */}
+                      <View style={MyStyles.row}>
+                        <Button
+                          mode="contained"
+                          compact
+                          style={{ flex: 1, marginRight: 6 }}
+                          buttonColor="#1abc9c"
+                          textColor="#fff"
+                        >
+                          Choose Files
+                        </Button>
+                      </View>
+
+                      {/* Image */}
+                      <Image
+                        source={{
+                          uri:
+                            catkey === "scooter"
+                              ? "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png"
+                              : "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg",
+                        }}
+                        style={{
+                          height: 130,
+                          width: "100%",
+                          marginVertical: 10,
+                          resizeMode: "contain",
+                        }}
+                      />
+
+                      {/* File Picker Button */}
+                      <View style={MyStyles.row}>
+                        <Button
+                          mode="contained"
+                          compact
+                          style={{ flex: 1, marginRight: 6 }}
+                          buttonColor="#1abc9c"
+                          textColor="#fff"
+                        >
+                          Add Images
+                        </Button>
+                        <Button
+                          mode="contained"
+                          compact
+                          buttonColor="#3498db"
+                          icon="upload"
+                        />
+                      </View>
+
+                      {/* SKU Input */}
+                      <TextInput
+                        mode="outlined"
+                        label="SKU"
+                        style={{ backgroundColor: "#fff", marginBottom: 10 }}
+                        onChangeText={(text) => setUpload({ ...upload, sku: text })}
+                      />
+
+                      {/* Fetch Image Button */}
+                      <Button
+                        mode="contained"
+                        compact
+                        style={{ marginBottom: 10 }}
+                        buttonColor="#007BFF"
+                      >
+                        FETCH IMAGE
+                      </Button>
+
+                      {/* Sub Category Dropdown */}
+                      <DropDown
+                        data={
+                          catkey === "scooter"
+                            ? [
+                              { label: "JUPITER", value: "JUPITER" },
+                              { label: "PEP", value: "PEP" },
+                            ]
+                            : [
+                              { label: "APACHE", value: "APACHE" },
+                              { label: "SPORTS", value: "SPORTS" },
+                            ]
+                        }
+                        placeholder="Sub Category"
+                        style={MyStyles.dropdown}
+                        onChangeText={(text) => setUpload({ ...upload, subCategory: text })}
+                      />
+
+                      {/* Remarks Input */}
+                      <TextInput
+                        mode="outlined"
+                        label="Remarks"
+                        style={{ backgroundColor: "#fff", marginTop: 10 }}
+                        onChangeText={(text) => setUpload({ ...upload, remarks: text })}
+                      />
+
+                      {/* Payment Input */}
+                      <TextInput
+                        mode="outlined"
+                        label="Payment"
+                        style={{ backgroundColor: "#fff", marginTop: 10 }}
+                        onChangeText={(text) => setUpload({ ...upload, payment: text })}
+                      />
+                    </View>
+                  ) : null
+                )}
+              </View>
+
+            </ScrollView>
+
+            {/* Bottom Buttons */}
+            <View
+              style={[
+                MyStyles.row,
+                {
+                  justifyContent: "space-between",
+                  marginTop: 10,
+                  gap: 8,
+                  padding: 10,
+                },
+              ]}
+            >
+              <Button
+                mode="contained"
+                color="#DC143C"
+                uppercase={false}
+                compact
+                onPress={() => {
+                  setModal({ ...modal, upload: false, uploadNext: false, checkIn: false });
+                  setUpload(null);
+                  setCheckIn(false);
+                }}
+                style={MyStyles.button}
+              >
+                CANCEL
+              </Button>
+              <Button mode="contained" onPress={() => {
+                setModal({ ...modal, upload: true, uploadNext: false, checkIn: false });
+              }} color="#007BFF" compact style={MyStyles.button}>
+                BACK
+              </Button>
+              <Button mode="contained" color="#007BFF" style={MyStyles.button} compact onPress={async () => {
+  // Prepare payload
+  const payload = {
+    tran_id: 0,
+    customer_id: upload?.customer_id || 0,
+    mobile: upload?.mobile || '',
+    full_name: upload?.full_name || '',
+    remarks: upload?.remarks || '',
+    sku: upload?.sku || '',
+    image_path: upload?.image_path || '',
+    appointment_date: upload?.appointment_date || '',
+    payment: upload?.payment || '',
+    color: upload?.color || '',
+    payment_mode: upload?.payment_mode || '',
+    sub_category: upload?.sub_category || '',
+    interest: upload?.interest || 'Yes',
+    staff_id: upload?.staff_id || '',
+    category_id: upload?.category_id || '',
+  };
+  try {
+    const resp = await postRequest(
+      'customervisit/insertCustomerUpload',
+      payload,
+      token
+    );
+    if (resp.status === 200 && resp.data && resp.data[0]?.valid) {
+      Alert.alert('Success', 'Upload successful!');
+      setModal({ ...modal, upload: false, uploadNext: false, checkIn: false });
+      setCheckIn(false);
+      setUpload(null);
+    } else {
+      Alert.alert('Error', resp.error || 'Upload failed.');
+    }
+  } catch (e) {
+    Alert.alert('Error', 'Network or server error.');
+  }
+}}>
+  CONTINUE
+</Button>
+            </View>
+          </View>
+        }
+      />
+
+
+
 
       {/*------------ Notification Modal ------------------- */}
       <Portal>
@@ -1872,61 +2004,61 @@ const Dashboard = (props) => {
                       {item.notification_type.slice(0, 1)}
                     </Text>
                   </Surface>
-                  <View style={{flexGrow:1, padding:5}}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <Text
-                      style={{
-                        color: "#FFF",
-                      }}
-                    >
-                      {item.full_name}
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#FFF",
-                      }}
-                    >
-                      {item.mobile}
-                    </Text>
-                  <Text
-                      style={{
-                        color: "#FFF",
-                      }}
-                    >
-                      {item.time}
-                    </Text>
-                    {/* <HTML  source={{ html: item.msg }} /> */}
+                  <View style={{ flexGrow: 1, padding: 5 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <Text
+                        style={{
+                          color: "#FFF",
+                        }}
+                      >
+                        {item.full_name}
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#FFF",
+                        }}
+                      >
+                        {item.mobile}
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#FFF",
+                        }}
+                      >
+                        {item.time}
+                      </Text>
+                      {/* <HTML  source={{ html: item.msg }} /> */}
+                    </View>
+                    {item.notification_type == "Feedback" && (
+                      <>
+                        <View style={{ display: "flex", flexDirection: "row" }}>
+                          {[...Array(item.f_count)].map((el, index) => <Text key={index}>⭐</Text>)}
+                        </View>
+                        <View style={{ width: 250 }}>
+                          <Text
+                            style={{
+                              color: "#FFF",
+                              wordWrap: 'break-word'
+                            }}
+                          >
+                            {item.f_service}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+
+                    {item.notification_type != "Feedback" && (
+                      <Text
+                        style={{
+                          color: "#FFF",
+                        }}
+                      >
+                        {item.notification_type}
+                      </Text>
+
+                    )}
+
                   </View>
-                  {item.notification_type == "Feedback" && (
-                    <>
-                    <View style={{display:"flex", flexDirection:"row"}}>
-                    {[...Array(item.f_count)].map((el, index) => <Text key={index}>⭐</Text>)}
-                    </View>
-                    <View style={{ width:250}}>
-                    <Text
-                      style={{
-                        color: "#FFF",
-                        wordWrap:'break-word'
-                      }}
-                    >
-                      {item.f_service}
-                    </Text>
-                    </View>
-                    </>
-                  )}
-                  
-                    {item.notification_type!="Feedback" && (
-                    <Text
-                      style={{
-                        color: "#FFF",
-                      }}
-                    >
-                      {item.notification_type}
-                    </Text>
-                  
-                  )}
-                  
-                </View>
                 </View>
               )}
               keyExtractor={(item, index) => index.toString()}

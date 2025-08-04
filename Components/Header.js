@@ -28,7 +28,7 @@ const Header = ({ logoPath, right }) => {
         style={{ resizeMode: "contain", width: 200, height: 50 }}
         source={
           logoPath
-            ? { uri: "https://jewellerapi.quickgst.in/BranchLogo/" + logoPath }
+            ? { uri: "https://api.quicktagg.com/BranchLogo/" + logoPath }
             : require("../assets/logo.png")
         }
       />
