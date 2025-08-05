@@ -6,20 +6,23 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
+  token
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Portal } from 'react-native-paper';
 import { Divider } from 'react-native-paper';
+import { postRequest } from '../../Services/RequestServices';
 const { width } = Dimensions.get('window');
 
 
-const Points = ({
+const ExtraCustomerPoint = ({
   visible,
   onClose,
   totalPoints,
   name,
   mobile,
   redeemPoints, 
+  cusomerId
 }) => {
   const [redeemingPoints, setRedeemingPoints] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -32,11 +35,29 @@ const Points = ({
   const [visibleExpiredPoints, setVisibleExpiredPoints] = useState(false);
 
   const handleSubmit = () => {
-    onSubmit({
-      redeemPoints: parseInt(redeemPoints),
-      staffName,
-      remark,
-    });
+        const payload = {
+          customer_id: cusomerId,
+          extra_point: redeemingPoints,
+          full_name: name,
+          mobile: mobile,
+          remark: remark,
+          staff_name: staffName,
+        };
+        console.log("payload",payload)
+        postRequest("customervisit/insert/extraPoint", payload, token)
+          .then((response) => {
+            console.log("response",response)
+            if (response?.status === 200) {
+              console.log("✅ Extra point added successfully:", response?.data);
+              // Optionally show a toast or close modal
+            } else {
+              console.warn("❌ Failed to add extra point:", response?.message);
+            }
+          })
+          .catch((error) => {
+            console.error("🚨 Error adding extra point:", error);
+          });
+      
   };
 
   return (
@@ -62,11 +83,11 @@ const Points = ({
               <View style={styles.formRow}>
                 {/* Left Column */}
                 <View style={styles.formCol}>
-                  <Text style={styles.label}>Redeem Points</Text>
+                  <Text style={styles.label}>Extra Points</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder="Redeem Points"
-                    value={redeemPoints}
+                    placeholder="Extra Points"
+                    value={redeemingPoints}
                     onChangeText={setRedeemingPoints}
                     keyboardType="numeric"
                     maxLength={6}
@@ -124,7 +145,7 @@ const Points = ({
   );
 };
 
-export default Points;
+export default ExtraCustomerPoint;
 
 const styles = StyleSheet.create({
   overlay: {

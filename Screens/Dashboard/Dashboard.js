@@ -28,6 +28,8 @@ import { postRequest, uploadImage } from "../../Services/RequestServices";
 import MyStyles from "../../Styles/MyStyles";
 import DatePicker from "../../Components/DatePicker";
 import RedeemModal from "./RedeemModal";
+import * as ImagePicker from 'react-native-image-picker';
+import * as DocumentPicker from 'react-native-document-picker'; 
 
 const Dashboard = (props) => {
   const { branchId, branchName, logoPath, token } = props.loginDetails;
@@ -36,6 +38,24 @@ const Dashboard = (props) => {
     scooter: false,
     motorcycle: true,
   });
+  const uploadImageFunc = (formData) => {
+    const url = `/customervisit/UploadCustomerImage`;
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+        "auth-token": localStorage.getItem("jwl_token"),
+      },
+    };
+
+    post(url, formData, config).then(
+      (response) => {
+        setOpenUpload(false);
+      },
+      (error) => {
+        // setSuccess(true);
+      }
+    );
+  };
   const toggleCategory = (type: 'scooter' | 'motorcycle') => {
     setCategory((prev) => ({ ...prev, [type]: !prev[type] }));
   };
@@ -1101,7 +1121,7 @@ const Dashboard = (props) => {
               </View>
             </View>
           ) : (
-            <RedeemModal visible={modal.redeem} onClose ={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null);}} points={points} redeem={redeem} expiredPoints={expiredPoints} redeemPoints={redeemPoints} voucherList={voucherList}/>
+            <RedeemModal visible={modal.redeem} onClose ={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null);}} points={points} redeem={redeem} expiredPoints={expiredPoints} redeemPoints={redeemPoints} voucherList={voucherList} token={token}/>
           )
         }
       />
@@ -1857,6 +1877,21 @@ const Dashboard = (props) => {
                           style={{ flex: 1, marginRight: 6 }}
                           buttonColor="#1abc9c"
                           textColor="#fff"
+                          onPress={async () => {
+                            try {
+                              const result = await DocumentPicker.pick({
+                                type: [DocumentPicker.types.images],
+                                copyTo: "documentPickerDir",
+                              });
+                              console.log("Selected file:", result);
+                            } catch (err) {
+                              if (DocumentPicker.isCancel(err)) {
+                                console.log("User cancelled the picker");
+                              } else {
+                                console.log("Error picking file:", err);
+                              }
+                            }
+                          }}
                         >
                           Add Images
                         </Button>
@@ -1865,6 +1900,7 @@ const Dashboard = (props) => {
                           compact
                           buttonColor="#3498db"
                           icon="upload"
+                          onPress={uploadImageFunc}
                         />
                       </View>
 
@@ -1882,6 +1918,34 @@ const Dashboard = (props) => {
                         compact
                         style={{ marginBottom: 10 }}
                         buttonColor="#007BFF"
+                        onPress={async () => {
+                            // const response = await fetch("/customervisit/SkuImage", {
+                            //   method: "POST",
+                            //   headers: {
+                            //     "Content-Type": "application/json",
+                            //     // Include authorization header if needed
+                            //     // "Authorization": "Bearer YOUR_TOKEN"
+                            //   },
+                           const payload={
+                            branch_id: upload.branch_id,
+                            sku: upload.sku,
+                            };
+                            // });
+                            postRequest("customervisit/SkuImage", payload, token)
+                            .then((response) => {
+                              if (response.status === 200) {
+                                console.log("✅ Extra point added successfully:", response.data);
+                                // Optionally show a toast or close modal
+                              } else {
+                                console.warn("❌ Failed to add extra point:", response.message);
+                              }
+                            })
+                            // const data = await response.json();
+                            // Do something with the image data here (e.g., set it to state)
+                            .catch((error) => {
+                              console.error("🚨 Error adding extra point:", error);
+                            });
+                        }}
                       >
                         FETCH IMAGE
                       </Button>

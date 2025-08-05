@@ -7,7 +7,7 @@ import Points from './Points';
 import ExtraCustomerPoint from './ExtraCustomerPoint';
 
 
-const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoints, expiredPoints }) => {
+const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoints, expiredPoints,token }) => {
     const [visibleVoucher, setVisibleVoucher] = React.useState(false);
     const [visiblePoints, setVisiblePoints] = React.useState(false);
     const [visibleExtra, setVisibleExtra] = React.useState(false);
@@ -75,9 +75,9 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
       </View>
     </View>
   </Modal>
-    <Points visible={visiblePoints} expiredPoints={expiredPoints} redeemPoints={redeemPoints} data={points} onClose={() => {setVisiblePoints(false)}} totalPoints={points?.total_points} name={voucherList?.full_name} mobile={voucherList?.mobile} />
-  <RedeemVoucher visible={visibleVoucher} redeem={redeem} customer={{name:voucherList?.full_name,phone:voucherList?.mobile,points:points?.total_points}} onClose={() => {setVisibleVoucher(false)}} />
-    <ExtraCustomerPoint visible={visibleExtra} redeem={redeem} customer={{name:voucherList?.full_name,phone:voucherList?.mobile,points:points?.total_points}} onClose={() => {setVisibleExtra(false)}} />
+    <Points visible={visiblePoints} expiredPoints={expiredPoints} redeemPoints={redeemPoints} data={points} onClose={() => {setVisiblePoints(false)}} totalPoints={points[0]?.total_points} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} />
+  <RedeemVoucher visible={visibleVoucher} totalPoints={points[0]?.total_points} redeem={redeem} customer={{name:voucherList[0]?.full_name,phone:voucherList[0]?.mobile,points:points[0]?.total_points}} onClose={() => {setVisibleVoucher(false)}} />
+    <ExtraCustomerPoint token={token} cusomerId={voucherList[0]?.customer_id} visible={visibleExtra} redeem={redeem} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} points={points[0]?.total_points} onClose={() => {setVisibleExtra(false)}} />
 </Portal>
 
   );

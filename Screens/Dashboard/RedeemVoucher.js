@@ -8,6 +8,7 @@ const CustomerRedeemModal = ({
   onClose,
   redeem,
   customer,
+  totalPoints,
 }) => {
   const filteredRedeem = Array.isArray(redeem)
   ? redeem.filter(item => item.IsvoucherExpire !== "true")
@@ -24,7 +25,7 @@ const CustomerRedeemModal = ({
           <Text style={styles.customerName}>{customer.name}</Text>
           <Text style={styles.customerPhone}>{customer.phone}</Text>
           <View style={styles.pointsBox}>
-            <Text style={styles.pointsText}>TOTAL POINT: {customer.points}</Text>
+            <Text style={styles.pointsText}>TOTAL POINT: {totalPoints}</Text>
           </View>
         </View>
 
