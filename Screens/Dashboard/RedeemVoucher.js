@@ -11,25 +11,29 @@ const CustomerRedeemModal = ({
   totalPoints,
 }) => {
   const filteredRedeem = Array.isArray(redeem)
-  ? redeem.filter(item => item.IsvoucherExpire !== "true")
+  ? redeem.filter(item => item)
   : [];
   
 
 
   return (
     <Portal>
-    {console.log("redeem",redeem)}
+    {console.log("redeem",redeem,filteredRedeem)}
 
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <View style={styles.customerInfo}>
+          <View style={styles.customerNameContainer}>
           <Text style={styles.customerName}>{customer.name}</Text>
+          </View>
+          <View style={styles.customerPhoneContainer}>
           <Text style={styles.customerPhone}>{customer.phone}</Text>
+          </View>
           <View style={styles.pointsBox}>
             <Text style={styles.pointsText}>TOTAL POINT: {totalPoints}</Text>
           </View>
         </View>
 
-        <DataTable>
+        <DataTable style={{ borderBottomWidth: 0 }}>
           <DataTable.Header>
             {["Voucher", "Details", "Offer", "Issue Date", "Expiry Date", "Action"].map((col) => (
               <DataTable.Title key={col} style={styles.cellHeader}>
@@ -42,7 +46,7 @@ const CustomerRedeemModal = ({
             <FlatList
               data={filteredRedeem}
               renderItem={({ item }) => (
-                <DataTable.Row>
+                <DataTable.Row style={{ borderBottomWidth: 1, borderColor: '#e0e0e0' }}>
                   <DataTable.Cell style={styles.cell}>{item.voucher_name}</DataTable.Cell>
                   <DataTable.Cell style={styles.cell}>{item.details}</DataTable.Cell>
                   <DataTable.Cell style={styles.cell}>{item.amount}</DataTable.Cell>
@@ -92,7 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginHorizontal: 20,
     borderRadius: 8,
-    padding: 20,
+    padding: 16,
     minHeight: "80%",
   },
   title: {
@@ -137,14 +141,22 @@ const styles = StyleSheet.create({
   cellHeader: {
     justifyContent: "center",
     flex: 1,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
+    padding: 4,
   },
   headerText: {
     color: "#0818A8",
     fontWeight: "bold",
+    fontSize: 12,
   },
   cell: {
     flex: 1,
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    padding: 4,
   },
   footer: {
     flexDirection: "row",

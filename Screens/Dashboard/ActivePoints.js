@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContainer: {
+    modalContainer: {
     backgroundColor: '#fff',
     width: '90%',
     borderRadius: 10,

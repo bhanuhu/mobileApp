@@ -22,7 +22,7 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
       <Text style={styles.header}>Customer Redeem Point System</Text>
       <View style={styles.divider} />
 
-      <View style={styles.pointsContainer}>
+      <View style={[styles.pointsContainer,{marginBottom: 8}]}>
         <Button style={styles.badge} onPress={() => {setVisibleVoucher(true)}}>
           <Text style={styles.buttonText}>VOUCHERS : {redeem[0]?.voucher_count}</Text>
         </Button>
@@ -61,13 +61,13 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
         </View>
       </View>
 
-      <View style={styles.bottomButtons}>
-        <Button mode="contained" style={[styles.button, { backgroundColor: "#1abc9c" }]} onPress={() => {setVisibleExtra(true)}}>
+      <View style={[styles.bottomButtons, {gap: 8}]}>
+        <Button mode="contained" style={[styles.button, { backgroundColor: "#1abc9c" , marginHorizontal: 8}]} onPress={() => {setVisibleExtra(true)}}>
           <Text style={styles.buttonText}>EXTRA</Text>
         </Button>
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: "#e74c3c" }]}
+          style={[styles.button, { backgroundColor: "#e74c3c", marginHorizontal: 8 }]}
           onPress={onClose}
         >
           <Text style={styles.buttonText}>CLOSE</Text>
@@ -75,9 +75,9 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
       </View>
     </View>
   </Modal>
-    <Points visible={visiblePoints} expiredPoints={expiredPoints} redeemPoints={redeemPoints} data={points} onClose={() => {setVisiblePoints(false)}} totalPoints={points[0]?.total_points} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} />
+    <Points visible={visiblePoints} cusomerId={voucherList[0]?.customer_id} token={token} expiredPoints={expiredPoints} redeemPoints={redeemPoints} data={points} onClose={() => {setVisiblePoints(false)}} totalPoints={points[0]?.total_points} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} />
   <RedeemVoucher visible={visibleVoucher} totalPoints={points[0]?.total_points} redeem={redeem} customer={{name:voucherList[0]?.full_name,phone:voucherList[0]?.mobile,points:points[0]?.total_points}} onClose={() => {setVisibleVoucher(false)}} />
-    <ExtraCustomerPoint token={token} cusomerId={voucherList[0]?.customer_id} visible={visibleExtra} redeem={redeem} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} points={points[0]?.total_points} onClose={() => {setVisibleExtra(false)}} />
+    <ExtraCustomerPoint token={token} cusomerId={voucherList[0]?.customer_id} visible={visibleExtra} redeem={redeem} name={voucherList[0]?.full_name} mobile={voucherList[0]?.mobile} totalPoints={points[0]?.total_points} onClose={() => {setVisibleExtra(false)}} />
 </Portal>
 
   );
@@ -115,8 +115,9 @@ const styles = StyleSheet.create({
       pointsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: 8,
+        padding: 8,
         borderRadius: 10,
+        backgroundColor: '#f8f9fa',
       },
       bottomButtons: {
         flexDirection: 'row',
@@ -127,6 +128,15 @@ const styles = StyleSheet.create({
     badge: {
       backgroundColor: "#3d66f2",
       borderRadius: 6,
+      
+      borderWidth: 1,
+      borderColor: '#1e40af',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      elevation: 3,
+      margin: 2,
     },
     buttonText: {
       color: "#fff",

@@ -5,24 +5,29 @@ import {
   Text,
   TextInput,
   StyleSheet,
+  TouchableOpacity,
   Dimensions,
-  token
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Portal } from 'react-native-paper';
+import ActivePoints from './ActivePoints';
+import RedeemPoints from './RedeemPoints';
+import ExpirePoints from './ExpirePoints';  
+const { width } = Dimensions.get('window');
 import { Divider } from 'react-native-paper';
 import { postRequest } from '../../Services/RequestServices';
-const { width } = Dimensions.get('window');
-
 
 const ExtraCustomerPoint = ({
+  token,
+  cusomerId,
   visible,
   onClose,
   totalPoints,
   name,
   mobile,
-  redeemPoints, 
-  cusomerId
+  data,
+  redeemPoints,
+  expiredPoints,
 }) => {
   const [redeemingPoints, setRedeemingPoints] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -35,29 +40,27 @@ const ExtraCustomerPoint = ({
   const [visibleExpiredPoints, setVisibleExpiredPoints] = useState(false);
 
   const handleSubmit = () => {
-        const payload = {
-          customer_id: cusomerId,
-          extra_point: redeemingPoints,
-          full_name: name,
-          mobile: mobile,
-          remark: remark,
-          staff_name: staffName,
-        };
-        console.log("payload",payload)
-        postRequest("customervisit/insert/extraPoint", payload, token)
-          .then((response) => {
-            console.log("response",response)
-            if (response?.status === 200) {
-              console.log("✅ Extra point added successfully:", response?.data);
-              // Optionally show a toast or close modal
-            } else {
-              console.warn("❌ Failed to add extra point:", response?.message);
-            }
-          })
-          .catch((error) => {
-            console.error("🚨 Error adding extra point:", error);
-          });
-      
+    const payload = {
+      customer_id: cusomerId,
+      mobile: mobile,
+      full_name: name,
+      extra_point: redeemingPoints,
+      remark: remark,
+      staff_name: staffName,
+    };
+  
+    const endpoint = 'customervisit/insert/extraPoint';
+  
+    postRequest(endpoint, payload, token)
+      .then((response) => {
+        console.log('Success:', response);
+        // handle success UI here
+        alert("Add Extra Point Successfully");
+      })
+      .catch((error) => {
+        console.error('Request failed:', error);
+        // handle error UI here
+      });
   };
 
   return (
@@ -66,28 +69,32 @@ const ExtraCustomerPoint = ({
         <Modal visible={visible} transparent animationType="fade">
           <View style={styles.overlay}>
             <View style={styles.modalWrapper}>
-               <View style={styles.modalHeader}>
+              <View style={styles.heading}>
                 <Text>Extra Customer Point</Text>
-               </View> 
-               <Divider />
+              </View>
+                <Divider />
               {/* Profile Card */}
-              <View style={styles.profileCard}>
-                <Text style={styles.profileName}>{name?.toUpperCase()}</Text>
-                <Text style={styles.profileMobile}>{mobile}</Text>
-                <View style={styles.profilePointsBadge}>
-                  <Text style={styles.profilePointsText}>TOTAL POINTS: {totalPoints}</Text>
+              <View style={styles.customerInfo}>
+                <View style={styles.customerNameContainer}>
+                  <Text style={styles.customerName}>{name?.toUpperCase()}</Text>
+                </View>
+                <View style={styles.customerPhoneContainer}>
+                  <Text style={styles.customerPhone}>{mobile}</Text>
+                </View>
+                <View style={styles.pointsBox}>
+                  <Text style={styles.pointsText}>TOTAL POINTS: {totalPoints}</Text>
                 </View>
               </View>
 
               {/* Redeem Form Section */}
               <View style={styles.formRow}>
                 {/* Left Column */}
-                <View style={styles.formCol}>
+                <View style={[styles.formCol, { marginRight: 12 }]}>
                   <Text style={styles.label}>Extra Points</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="Extra Points"
-                    value={redeemingPoints}
+                    value={redeemPoints}
                     onChangeText={setRedeemingPoints}
                     keyboardType="numeric"
                     maxLength={6}
@@ -116,7 +123,6 @@ const ExtraCustomerPoint = ({
                   placeholder="Type here..."
                   value={remark}
                   onChangeText={setRemark}
-                  multiline
                   maxLength={200}
                   placeholderTextColor="#999"
                 />
@@ -124,11 +130,12 @@ const ExtraCustomerPoint = ({
                   <Text style={{ color: remainingChars === 0 ? 'blue' : '#222', fontWeight: 'bold' }}>{200 - remainingChars}</Text>/200
                 </Text>
               </View>
+              <Divider />
 
               {/* Action Buttons Row */}
               <View style={styles.actionRow}>
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
-                  ADD POINT
+                  ADD POINTS
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
                   BACK
@@ -141,6 +148,9 @@ const ExtraCustomerPoint = ({
           </View>
         </Modal>
       </Portal>
+      <RedeemPoints visible={visibleRedeemPoints} onClose={() => setVisibleRedeemPoints(false)} data={redeemPoints} />
+      <ExpirePoints visible={visibleExpiredPoints} onClose={() => setVisibleExpiredPoints(false)} data={expiredPoints} />
+      <ActivePoints visible={visibleActivePoints} onClose={() => setVisibleActivePoints(false)} data={data} />
     </>
   );
 };
@@ -153,6 +163,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 10,
+    textAlign: 'center',
   },
   modalWrapper: {
     width: '98%',
@@ -174,7 +190,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 10,
     gap: 8,
   },
   tabButton: {
@@ -189,6 +205,9 @@ const styles = StyleSheet.create({
   activeButton: {
     backgroundColor: '#3699fe',
   },
+  redeemButton: {
+    backgroundColor: '#f64e60',
+  },
   expireButton: {
     backgroundColor: '#f64e60',
   },
@@ -197,29 +216,37 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#fafbfc',
+  customerInfo: {
+    backgroundColor: "#fdfdfd",
+    elevation: 3,
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 16,
-    marginTop: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 5,
-    elevation: 1,
-    flexShrink: 1,
-    flexWrap: 'wrap',
+    padding: 5,
+    marginBottom: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  profileName: {
-    fontSize: 22,
-    fontStyle: 'italic',
-    color: '#b0b0b0',
-    fontWeight: '600',
-    flex: 1,
+  customerName: {
+    fontStyle: "italic",
+    fontSize: 16,
+    color: "#888",
+
+    marginLeft: 8,
+  },
+  // customerNameContainer: {
+  //   textAlign: "center",
+  // },
+  customerPhone: {
+    fontStyle: "italic",
+    fontSize: 16,
+    color: "#888",
+    // textAlign: "center",
+  },
+  pointsBox: {
+    backgroundColor: "#ffa500",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 4,
   },
   profileMobile: {
     fontSize: 20,
@@ -279,27 +306,28 @@ const styles = StyleSheet.create({
   },
   remarkSection: {
     marginTop: 8,
-    marginBottom: 6,
+    marginBottom: 12,
   },
   remarkInput: {
     borderWidth: 1,
     borderColor: '#d6d6d6',
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 12,
-    paddingVertical: 15,
+    paddingVertical: 10,
     fontSize: 15,
     backgroundColor: '#fafbfc',
     color: '#222',
-    minHeight: 80,
-    maxHeight: 120,
-    marginBottom: 4,
+    minHeight: 10,
+    maxHeight: 100,
+    marginBottom: 2,
+    textAlignVertical: 'top',
   },
   charCount: {
     alignSelf: 'flex-start',
-    fontSize: 16,
+    fontSize: 13,
     color: 'blue',
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontWeight: '500',
+    marginTop: 2,
     marginLeft: 2,
   },
   actionRow: {
@@ -388,18 +416,11 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 4,
   },
-  remarkInput: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 6,
-    padding: 10,
-    height: 100,
-    textAlignVertical: 'top',
-  },
+
   charCount: {
     textAlign: 'right',
     color: 'blue',
-    marginTop: 4,
+    marginTop: 2,
     fontWeight: 'bold',
   },
   footer: {

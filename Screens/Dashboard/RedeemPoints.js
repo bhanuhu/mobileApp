@@ -39,7 +39,7 @@ function formatToDate(dateTime) {
         <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={styles.title}>Active Customer Point</Text>
+            <Text style={styles.title}>Redeem Customer Point</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.close}>✕</Text>
             </TouchableOpacity>
@@ -95,11 +95,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    width: width * 0.98,
     backgroundColor: '#fff',
+    width: '90%',
     borderRadius: 10,
-    padding: 0,
+    padding: 8,
     maxHeight: '90%',
+    overflow: 'scroll',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
   tableWrapper: {
     margin: 20,
     marginTop: 18,
+    
     borderWidth: 1,
     borderColor: '#e5e5e5',
     borderRadius: 8,
