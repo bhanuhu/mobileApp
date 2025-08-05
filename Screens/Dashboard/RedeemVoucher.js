@@ -18,7 +18,7 @@ const CustomerRedeemModal = ({
 
   return (
     <Portal>
-    {console.log("redeem",redeem,filteredRedeem)}
+    {console.log("redeem-----",redeem,filteredRedeem)}
 
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <View style={styles.customerInfo}>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 8,
     padding: 16,
-    minHeight: "80%",
+    minHeight: "60%",
   },
   title: {
     fontSize: 18,
@@ -107,10 +107,12 @@ const styles = StyleSheet.create({
   },
   customerInfo: {
     backgroundColor: "#fdfdfd",
-    elevation: 3,
+    width: "95%",
+    marginLeft: 18,
+    elevation: 5,
     borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
+    padding: 5,
+    marginBottom: 25,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -118,15 +120,15 @@ const styles = StyleSheet.create({
   customerName: {
     fontStyle: "italic",
     fontSize: 16,
-    flex: 1,
     color: "#888",
+    marginLeft: 8,
+    
   },
   customerPhone: {
     fontStyle: "italic",
     fontSize: 16,
-    flex: 1,
     color: "#888",
-    textAlign: "center",
+  
   },
   pointsBox: {
     backgroundColor: "#ffa500",

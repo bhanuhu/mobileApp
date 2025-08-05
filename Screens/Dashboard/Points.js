@@ -78,7 +78,7 @@ const Points = ({
                   labelStyle={styles.tabButtonLabel}
                   onPress={() => setVisibleActivePoints(true)}
                 >
-                  Active Points
+                  <Text style={{ fontSize: 12 }}>Active Points</Text>
                 </Button>
                 <Button
                   mode="contained"
@@ -86,7 +86,7 @@ const Points = ({
                   labelStyle={[styles.tabButtonLabel, { color: '#222' }]}
                   onPress={() => setVisibleRedeemPoints(true)}
                 >
-                  Redeem Points
+                  <Text style={{ fontSize: 12 }}>Redeem Points</Text>
                 </Button>
                 <Button
                   mode="contained"
@@ -94,7 +94,7 @@ const Points = ({
                   labelStyle={styles.tabButtonLabel}
                   onPress={() => setVisibleExpiredPoints(true)}
                 >
-                  Expire Points
+                  <Text style={{ fontSize: 12 }}>Expire Points</Text>
                 </Button>
               </View>
 
@@ -179,13 +179,13 @@ const Points = ({
               {/* Action Buttons Row */}
               <View style={styles.actionRow}>
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
-                  SUBMIT
+                  <Text style={{ fontSize: 12 }}>SUBMIT</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
-                  BACK
+                  <Text style={{ fontSize: 12 }}>BACK</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.close]} labelStyle={styles.actionLabel} onPress={onClose}>
-                  CLOSE
+                  <Text style={{ fontSize: 12 }}>CLOSE</Text>
                 </Button>
               </View>
             </View>
@@ -229,7 +229,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginBottom: 10,
-    gap: 8,
+    maxWidth: 450,
+    gap: 20,
   },
   tabButton: {
     flex: 1,
@@ -237,14 +238,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 0,
     backgroundColor: '#e4e6ef',
-    height: 38,
+    height: 35,
     justifyContent: 'center',
   },
   activeButton: {
     backgroundColor: '#3699fe',
   },
   redeemButton: {
-    backgroundColor: '#f64e60',
+    backgroundColor: '#e4e6ef',
   },
   expireButton: {
     backgroundColor: '#f64e60',
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
   actionButton: {
     borderRadius: 8,
     minWidth: 90,
-    height: 40,
+    height: 35,
     marginHorizontal: 2,
     justifyContent: 'center',
   },

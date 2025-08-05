@@ -71,7 +71,7 @@ const ExtraCustomerPoint = ({
           <View style={styles.overlay}>
             <View style={styles.modalWrapper}>
               <View style={styles.heading}>
-                <Text>Extra Customer Point</Text>
+                <Text style={{ fontSize: 18, fontWeight: '800', marginTop: 10 }}>Extra Customer Point</Text>
               </View>
                 <Divider />
               {/* Profile Card */}
@@ -116,6 +116,11 @@ const ExtraCustomerPoint = ({
                                         borderColor: '#ccc',
                                         borderWidth: 1,
                                         borderRadius: 6,
+                                        paddingHorizontal: 2,
+                                        fontSize: 12,
+                                        marginBottom: 2,
+                                        minWidth: 150,
+                                        height: 46,
                                       }}
                                     />
                 </View>
@@ -141,13 +146,13 @@ const ExtraCustomerPoint = ({
               {/* Action Buttons Row */}
               <View style={styles.actionRow}>
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
-                  ADD POINTS
+                  <Text style={{ fontSize: 12 }}>ADD POINTS</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
-                  BACK
+                  <Text style={{ fontSize: 12 }}>BACK</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.close]} labelStyle={styles.actionLabel} onPress={onClose}>
-                  CLOSE
+                  <Text style={{ fontSize: 12 }}>CLOSE</Text>
                 </Button>
               </View>
             </View>
@@ -171,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heading: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
     marginBottom: 10,
     textAlign: 'center',
@@ -340,14 +345,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 5,
     gap: 8,
     flexWrap: 'wrap',
   },
   actionButton: {
     borderRadius: 8,
     minWidth: 90,
-    height: 40,
+    height: 35,
     marginHorizontal: 2,
     justifyContent: 'center',
   },

@@ -1200,7 +1200,7 @@ const Dashboard = (props) => {
                                       token
                                     ).then((voucherResp) => {
                                       if (voucherResp?.status === 200) {
-                                        console.log("Redeem List:", voucherResp.data);
+                                        console.log("Redeem List:-----", voucherResp.data);
                                         setRedeem(voucherResp.data);
                                         setModal({ ...modal, redeem: true });
                                       }
@@ -1847,6 +1847,7 @@ const Dashboard = (props) => {
                           fontSize: 12,
                           marginBottom: 2,
                           minWidth: 150,
+                          height: 50,
                         }}
                       />
                     </View>
@@ -1979,7 +1980,7 @@ const Dashboard = (props) => {
             <ScrollView>
               <View style={[MyStyles.row, { justifyContent: "space-around", flexWrap: 'wrap' }]}>
   {payloadData.map((payload, index) => (
-    <View key={index} style={{ flex: 0.45, marginBottom: 20 }}>
+    <View key={index} style={{ flex: 0.30, marginBottom: 20 }}>
       <Text
         style={{
           backgroundColor: "#eee",

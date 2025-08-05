@@ -16,7 +16,7 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
     if (!visible) return null;
   return (
     <Portal>
-        {console.log("voucherList hi kehde",voucherList)}
+        {console.log("voucherList hi kehde",redeem)}
 <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
 <View style={styles.container}>
       <Text style={styles.header}>Customer Redeem Point System</Text>
@@ -24,10 +24,10 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
 
       <View style={[styles.pointsContainer,{marginBottom: 8}]}>
         <Button style={styles.badge} onPress={() => {setVisibleVoucher(true)}}>
-          <Text style={styles.buttonText}>VOUCHERS : {redeem[0]?.voucher_count}</Text>
+          <Text style={styles.buttonText}>VOUCHERS : {redeem[0]?.voucher_count||0}</Text>
         </Button>
         <Button style={styles.badge} onPress={() => {setVisiblePoints(true)}}>
-          <Text style={styles.buttonText}>POINTS : {points[0]?.total_points}</Text>
+          <Text style={styles.buttonText}>POINTS : {points[0]?.total_points||0}</Text>
         </Button>
       </View>
 

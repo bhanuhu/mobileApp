@@ -47,7 +47,7 @@ const DropDown = ({
             backgroundColor: "white",
             maxWidth: "80%",
             height: 20,
-            marginTop: -17,
+            marginTop: -35,
             marginEnd: "auto",
           },
           error ? { color: "#8B0000" } : null,
@@ -59,7 +59,7 @@ const DropDown = ({
         style={[
           {
             //borderWidth: 1,
-            borderBottomWidth: 1,
+            // borderBottomWidth: 1,
             borderColor: disabled ? "#555" : "#7a7a7a",
             borderRadius: 5,
             marginTop: 8,
