@@ -58,6 +58,8 @@ const Dashboard = (props) => {
   const [upload, setUpload] = useState(null);
   const [points, setPoints] = useState(null);
   const [customerId, setCustomerId] = useState(null);
+  const [redeemPoints, setRedeemPoints] = useState(null);
+  const [expiredPoints, setExpiredPoints] = useState(null);
   const subCategoryData =
     category === "SCOOTER"
       ? [
@@ -118,30 +120,51 @@ const Dashboard = (props) => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     imageSwitch();
     postRequest("masters/customer/tabtoscanBannerBrowse", {}, token).then((res) => {
-      console.log(res);
+      if (!res || typeof res !== 'object' || res.status === undefined) {
+        console.error("Invalid API response for tabtoscanBannerBrowse", res);
+        // Optionally: setBannerImages([]); setImageUri(null);
+        return;
+      }
       if (res.status == 200) {
-        const data = res.data.map((item) => {
-          return item.url + item.image_path;
-        });
+        const data = res.data.map((item) => item.url + item.image_path);
         setBannerImages(data);
-
         setImageUri(data[0]);
       }
+    }).catch((err) => {
+      console.error("API error (tabtoscanBannerBrowse):", err);
     });
     postRequest("customervisit/StaffList", {}, token).then((resp) => {
+      if (!resp || typeof resp !== 'object' || resp.status === undefined) {
+        console.error("Invalid API response for StaffList", resp);
+        return;
+      }
       if (resp.status == 200) {
         setStaffList(resp.data);
       }
+    }).catch((err) => {
+      console.error("API error (StaffList):", err);
     });
     postRequest("customervisit/CategoryList", {}, token).then((resp) => {
+      if (!resp || typeof resp !== 'object' || resp.status === undefined) {
+        console.error("Invalid API response for CategoryList", resp);
+        return;
+      }
       if (resp.status == 200) {
         setCategoryList(resp.data);
       }
+    }).catch((err) => {
+      console.error("API error (CategoryList):", err);
     });
     postRequest("customervisit/AreaList", {}, token).then((resp) => {
+      if (!resp || typeof resp !== 'object' || resp.status === undefined) {
+        console.error("Invalid API response for AreaList", resp);
+        return;
+      }
       if (resp.status == 200) {
         setAreaList(resp.data);
       }
+    }).catch((err) => {
+      console.error("API error (AreaList):", err);
     });
   }, []);
 
@@ -170,9 +193,15 @@ const Dashboard = (props) => {
 
   useEffect(() => {
     postRequest("customervisit/getRecentvisiters", {}, token).then((resp) => {
+      if (!resp || typeof resp !== 'object' || resp.status === undefined) {
+        console.error("Invalid API response for getRecentvisiters", resp);
+        return;
+      }
       if (resp.status == 200) {
         setRecentVistors(resp.data);
       }
+    }).catch((err) => {
+      console.error("API error (getRecentvisiters):", err);
     });
   }, [details, redeem, checkIn, upload, join]);
 
@@ -449,8 +478,8 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        setDetails(resp.data);
+                      if (resp?.status == 200) {
+                        setDetails(resp?.data);
                       }
                     });
                   }}
@@ -557,8 +586,8 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        setHistory(resp.data);
+                      if (resp?.status == 200) {
+                        setHistory(resp?.data);
                         setModal({ ...modal, details: false, history: true });
                       }
                     });
@@ -580,8 +609,8 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        setDesign(resp.data);
+                      if (resp?.status == 200) {
+                        setDesign(resp?.data);
                         setModal({ ...modal, details: false, design: true });
                       }
                     });
@@ -592,8 +621,8 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        setWishlist(resp.data);
+                      if (resp?.status == 200) {
+                        setWishlist(resp?.data);
                       }
                     });
                     postRequest(
@@ -603,8 +632,8 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        setExhibition(resp.data);
+                      if (resp?.status == 200) {
+                        setExhibition(resp?.data);
                       }
                     });
                   }}
@@ -988,44 +1017,75 @@ const Dashboard = (props) => {
                   uppercase={false}
                   compact
                   onPress={() => {
+                    console.log("modal.mobile", modal.mobile);
                     postRequest(
                       "customervisit/getCustomerVisit",
-                      {
-                        mobile: modal.mobile,
-                      },
+                      { mobile: modal.mobile },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
-                        console.log("voucherList", resp.data);
-                        const customerData = resp.data[0];
+                      if (resp?.status === 200) {
+                        const customerData = resp.data;
+                        console.log("VoucherList", customerData);
                         setVoucherList(customerData);
-                        setCustomerId(customerData.customer_id);
+                        setCustomerId(customerData[0].customer_id);
+                        console.log("customerId", customerData[0].customer_id);
                   
-                        // First: Fetch customer points
+                        // 1️⃣ Fetch customer points
                         postRequest(
                           "customervisit/getCustomerPointList",
                           {
-                            customer_id: customerData.customer_id,
+                            customer_id: customerData[0].customer_id,
                             branch_id: branchId,
                           },
                           token
                         ).then((pointResp) => {
-                          if (pointResp.status === 200) {
-                            console.log("Customer points:", pointResp.data);
-                            setPoints(pointResp.data[0]);
-                            // Second: Fetch voucher list
+                          if (pointResp?.status === 200) {
+                            console.log("Active points:", pointResp.data);
+                            setPoints(pointResp.data);
+                  
+                            // 2️⃣ Fetch expired points
                             postRequest(
-                              "customervisit/getCustomerVoucherList",
+                              "customervisit/getCustomerExpirePointList",
                               {
-                                customer_id: customerData.customer_id,
+                                customer_id: customerData[0].customer_id,
                                 branch_id: branchId,
                               },
                               token
-                            ).then((voucherResp) => {
-                              if (voucherResp.status === 200) {
-                                console.log("redeem", voucherResp.data);
-                                setRedeem(voucherResp.data);
-                                setModal({ ...modal, redeem: true });
+                            ).then((expirePointResp) => {
+                              if (expirePointResp?.status === 200) {
+                                console.log("Expired Points:", expirePointResp.data);
+                                setExpiredPoints?.(expirePointResp.data); // only if this state exists
+                  
+                                // 3️⃣ Fetch customer redeem points
+                                postRequest(
+                                  "customervisit/getCustomerRedeemPointList",
+                                  {
+                                    customer_id: customerData[0].customer_id,
+                                    branch_id: branchId,
+                                  },
+                                  token
+                                ).then((redeemPointResp) => {
+                                  if (redeemPointResp?.status === 200) {
+                                    console.log("Redeemed Points:", redeemPointResp.data);
+                                    setRedeemPoints(redeemPointResp.data);
+                  
+                                    // 4️⃣ Fetch customer vouchers
+                                    postRequest(
+                                      "customervisit/getCustomerVoucherList",
+                                      {
+                                        customer_id: customerData[0].customer_id,
+                                        branch_id: branchId,
+                                      },
+                                      token
+                                    ).then((voucherResp) => {
+                                      if (voucherResp?.status === 200) {
+                                        console.log("Redeem List:", voucherResp.data);
+                                        setRedeem(voucherResp.data);
+                                        setModal({ ...modal, redeem: true });
+                                      }
+                                    });
+                                  }
+                                });
                               }
                             });
                           }
@@ -1033,13 +1093,15 @@ const Dashboard = (props) => {
                       }
                     });
                   }}
+                  
+                  
                 >
                   Continue
                 </Button>
               </View>
             </View>
           ) : (
-            <RedeemModal visible={modal.redeem} onClose={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null); setVoucherList(null);}} points={points} redeem={redeem} voucherList={voucherList}/>
+            <RedeemModal visible={modal.redeem} onClose ={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null);}} points={points} redeem={redeem} expiredPoints={expiredPoints} redeemPoints={redeemPoints} voucherList={voucherList}/>
           )
         }
       />
@@ -1167,7 +1229,7 @@ const Dashboard = (props) => {
                           },
                           token
                         ).then((resp) => {
-                          if (resp.status == 200) {
+                          if (resp?.status == 200) {
                             console.log(resp.data[0].customer_id);
                             setJoin({
                               ...join,
@@ -1266,7 +1328,7 @@ const Dashboard = (props) => {
                     postRequest("customervisit/insertNewCustomerVisit", join, token).then(
                       (resp) => {
                         console.log(resp);
-                        if (resp.status == 200) {
+                        if (resp?.status == 200) {
                           setModal({ ...modal, join: false });
                           setJoin({});
                         }
@@ -1322,10 +1384,10 @@ const Dashboard = (props) => {
                     },
                     token
                   ).then((resp) => {
-                    if (resp.status == 200) {
+                    if (resp?.status == 200) {
                       setModal({ ...modal, area: false });
                       postRequest("customervisit/AreaList", {}, token).then((resp) => {
-                        if (resp.status == 200) {
+                        if (resp?.status == 200) {
                           setAreaList(resp.data);
                         }
                       });
@@ -1401,7 +1463,7 @@ const Dashboard = (props) => {
                       token
                     ).then((resp) => {
                       //console.log(resp);
-                      if (resp.status == 200) {
+                      if (resp?.status == 200) {
                         postRequest(
                           "customervisit/insertCustomerVisit",
                           {
@@ -1410,7 +1472,7 @@ const Dashboard = (props) => {
                           },
                           token
                         ).then((resp) => {
-                          if (resp.status == 200) {
+                          if (resp?.status == 200) {
                             setCheckIn(resp.data[0]);
                             setTimeout(() => {
                               setModal({ ...modal, checkIn: false });
@@ -1419,7 +1481,7 @@ const Dashboard = (props) => {
                           }
                         });
                       }
-                      if (resp.status == 500) {
+                      if (resp?.status == 500) {
                         setJoin({ ...join, mobile: modal.mobile });
                         setModal({ ...modal, join: true, checkIn: false });
                       }
@@ -1605,7 +1667,7 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      if (resp.status == 200) {
+                      if (resp?.status == 200) {
                         setUpload({
                           tran_id: "0",
                           branch_id: branchId,
@@ -1920,7 +1982,7 @@ const Dashboard = (props) => {
       payload,
       token
     );
-    if (resp.status === 200 && resp.data && resp.data[0]?.valid) {
+    if (resp?.status === 200 && resp?.data && resp?.data[0]?.valid) {
       Alert.alert('Success', 'Upload successful!');
       setModal({ ...modal, upload: false, uploadNext: false, checkIn: false });
       setCheckIn(false);

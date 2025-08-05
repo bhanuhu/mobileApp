@@ -5,14 +5,11 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Portal } from 'react-native-paper';
-import ActivePoints from './ActivePoints';
-import RedeemPoints from './RedeemPoints';
-import ExpirePoints from './ExpirePoints';  
+import { Divider } from 'react-native-paper';
 const { width } = Dimensions.get('window');
 
 
@@ -22,9 +19,7 @@ const Points = ({
   totalPoints,
   name,
   mobile,
-  data,
-  redeemPoints,
-  expiredPoints,
+  redeemPoints, 
 }) => {
   const [redeemingPoints, setRedeemingPoints] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -50,34 +45,10 @@ const Points = ({
         <Modal visible={visible} transparent animationType="fade">
           <View style={styles.overlay}>
             <View style={styles.modalWrapper}>
-              {/* Tab Row */}
-              <View style={styles.buttonRow}>
-                <Button
-                  mode="contained"
-                  style={[styles.tabButton, styles.activeButton]}
-                  labelStyle={styles.tabButtonLabel}
-                  onPress={() => setVisibleActivePoints(true)}
-                >
-                  Active Points
-                </Button>
-                <Button
-                  mode="contained"
-                  style={styles.tabButton}
-                  labelStyle={[styles.tabButtonLabel, { color: '#222' }]}
-                  onPress={() => setVisibleRedeemPoints(true)}
-                >
-                  Redeem Points
-                </Button>
-                <Button
-                  mode="contained"
-                  style={[styles.tabButton, styles.expireButton]}
-                  labelStyle={styles.tabButtonLabel}
-                  onPress={() => setVisibleExpiredPoints(true)}
-                >
-                  Expire Points
-                </Button>
-              </View>
-
+               <View style={styles.modalHeader}>
+                <Text>Extra Customer Point</Text>
+               </View> 
+               <Divider />
               {/* Profile Card */}
               <View style={styles.profileCard}>
                 <Text style={styles.profileName}>{name?.toUpperCase()}</Text>
@@ -136,7 +107,7 @@ const Points = ({
               {/* Action Buttons Row */}
               <View style={styles.actionRow}>
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
-                  SUBMIT
+                  ADD POINT
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
                   BACK
@@ -149,9 +120,6 @@ const Points = ({
           </View>
         </Modal>
       </Portal>
-      <RedeemPoints visible={visibleRedeemPoints} onClose={() => setVisibleRedeemPoints(false)} data={redeemPoints} />
-      <ExpirePoints visible={visibleExpiredPoints} onClose={() => setVisibleExpiredPoints(false)} data={expiredPoints} />
-      <ActivePoints visible={visibleActivePoints} onClose={() => setVisibleActivePoints(false)} data={data} />
     </>
   );
 };
