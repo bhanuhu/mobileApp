@@ -4,16 +4,19 @@ import { Button } from 'react-native-paper';
 import RedeemVoucher from './RedeemVoucher';
 import { Modal, Portal } from 'react-native-paper';
 import Points from './Points';
+import ExtraCustomerPoint from './ExtraCustomerPoint';
 
 
-const RedeemModal = ({ redeem, points, voucherList, visible, onClose }) => {
+const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoints, expiredPoints }) => {
     const [visibleVoucher, setVisibleVoucher] = React.useState(false);
     const [visiblePoints, setVisiblePoints] = React.useState(false);
+    const [visibleExtra, setVisibleExtra] = React.useState(false);
    
 
     if (!visible) return null;
   return (
     <Portal>
+        {console.log("voucherList hi kehde",voucherList)}
 <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
 <View style={styles.container}>
       <Text style={styles.header}>Customer Redeem Point System</Text>
@@ -24,7 +27,7 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose }) => {
           <Text style={styles.buttonText}>VOUCHERS : {redeem[0]?.voucher_count}</Text>
         </Button>
         <Button style={styles.badge} onPress={() => {setVisiblePoints(true)}}>
-          <Text style={styles.buttonText}>POINTS : {points?.total_points}</Text>
+          <Text style={styles.buttonText}>POINTS : {points[0]?.total_points}</Text>
         </Button>
       </View>
 
@@ -38,9 +41,9 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose }) => {
             <Text style={styles.label}>Date Of Anniversary</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.value}>{voucherList?.full_name}</Text>
-            <Text style={styles.value}>{voucherList?.dob}</Text>
-            <Text style={styles.value}>{voucherList?.doa}</Text>
+            <Text style={styles.value}>{voucherList[0]?.full_name}</Text>
+            <Text style={styles.value}>{voucherList[0]?.dob}</Text>
+            <Text style={styles.value}>{voucherList[0]?.doa}</Text>
           </View>
 
           <View style={styles.divider} />
@@ -51,15 +54,15 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose }) => {
             <Text style={styles.label}>Last Visit</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.value}>{voucherList?.category_name}</Text>
-            <Text style={styles.value}>{voucherList?.visit_count}</Text>
-            <Text style={styles.value}>{voucherList?.last_visit}</Text>
+            <Text style={styles.value}>{voucherList[0]?.category_name}</Text>
+            <Text style={styles.value}>{voucherList[0]?.visit_count}</Text>
+            <Text style={styles.value}>{voucherList[0]?.last_visit}</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.bottomButtons}>
-        <Button mode="contained" style={[styles.button, { backgroundColor: "#1abc9c" }]}>
+        <Button mode="contained" style={[styles.button, { backgroundColor: "#1abc9c" }]} onPress={() => {setVisibleExtra(true)}}>
           <Text style={styles.buttonText}>EXTRA</Text>
         </Button>
         <Button
@@ -72,8 +75,9 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose }) => {
       </View>
     </View>
   </Modal>
-    <Points visible={visiblePoints} onClose={() => {setVisiblePoints(false)}} totalPoints={points?.total_points} name={voucherList?.full_name} mobile={voucherList?.mobile} />
+    <Points visible={visiblePoints} expiredPoints={expiredPoints} redeemPoints={redeemPoints} data={points} onClose={() => {setVisiblePoints(false)}} totalPoints={points?.total_points} name={voucherList?.full_name} mobile={voucherList?.mobile} />
   <RedeemVoucher visible={visibleVoucher} redeem={redeem} customer={{name:voucherList?.full_name,phone:voucherList?.mobile,points:points?.total_points}} onClose={() => {setVisibleVoucher(false)}} />
+    <ExtraCustomerPoint visible={visibleExtra} redeem={redeem} customer={{name:voucherList?.full_name,phone:voucherList?.mobile,points:points?.total_points}} onClose={() => {setVisibleExtra(false)}} />
 </Portal>
 
   );

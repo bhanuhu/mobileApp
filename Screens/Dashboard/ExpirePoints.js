@@ -39,7 +39,7 @@ function formatToDate(dateTime) {
         <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={styles.title}>Active Customer Point</Text>
+            <Text style={styles.title}>Expired Customer Point</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.close}>✕</Text>
             </TouchableOpacity>
@@ -51,6 +51,7 @@ function formatToDate(dateTime) {
               <Text style={[styles.cell, styles.headerCell]}>Mobile</Text>
               <Text style={[styles.cell, styles.headerCell]}>Type</Text>
               <Text style={[styles.cell, styles.headerCell]}>Remark</Text>
+              <Text style={[styles.cell, styles.headerCell]}>Staff Name</Text>
               <Text style={[styles.cell, styles.headerCell]}>Points</Text>
               <Text style={[styles.cell, styles.headerCell]}>Date</Text>
               <Text style={[styles.cell, styles.headerCell]}>Expired Date</Text>
@@ -69,6 +70,7 @@ function formatToDate(dateTime) {
                     <Text style={styles.cell}>{item.mobile}</Text>
                     <Text style={styles.cell}>{item.type}</Text>
                     <Text style={styles.cell}>{item.remark}</Text>
+                    <Text style={styles.cell}>{item.staff_name}</Text>
                     <Text style={styles.cell}>{item.points}</Text>
                     <Text style={[styles.cell, styles.dateCell]}>{formatToDate(item.date_time)}</Text>
                     <Text style={[styles.cell, styles.expiredCell]}>{formatToDate(item.expire_date)}</Text>
@@ -95,12 +97,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
+    width: width * 0.98,
     backgroundColor: '#fff',
-    width: '90%',
     borderRadius: 10,
-    padding: 8,
+    padding: 0,
     maxHeight: '90%',
-    overflow: 'scroll',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -112,11 +113,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 20,
     paddingBottom: 10,
     borderBottomWidth: 2,
     borderBottomColor: '#ececec',
-    width: '100%',
   },
   title: {
     fontWeight: 'bold',
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e5e5',
     borderRadius: 8,
-    overflow: 'scroll',
+    overflow: 'hidden',
     backgroundColor: '#fff',
   },
   tableBodyScroll: {
@@ -170,7 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     textAlign: 'left',
     backgroundColor: '#f8faff',
-    width: '100%',
   },
   rowEven: {
     backgroundColor: '#fff',
