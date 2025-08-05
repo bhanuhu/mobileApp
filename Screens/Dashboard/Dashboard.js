@@ -28,8 +28,8 @@ import { postRequest, uploadImage } from "../../Services/RequestServices";
 import MyStyles from "../../Styles/MyStyles";
 import DatePicker from "../../Components/DatePicker";
 import RedeemModal from "./RedeemModal";
-import * as ImagePicker from 'react-native-image-picker';
-import * as DocumentPicker from 'react-native-document-picker'; 
+// import * as ImagePicker from 'react-native-image-picker';
+// import * as DocumentPicker from 'react-native-document-picker'; 
 
 const Dashboard = (props) => {
   const { branchId, branchName, logoPath, token } = props.loginDetails;
@@ -39,22 +39,22 @@ const Dashboard = (props) => {
     motorcycle: true,
   });
   const uploadImageFunc = (formData) => {
-    const url = `/customervisit/UploadCustomerImage`;
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data",
-        "auth-token": localStorage.getItem("jwl_token"),
-      },
-    };
+    // const url = `/customervisit/UploadCustomerImage`;
+    // const config = {
+    //   headers: {
+    //     "content-type": "multipart/form-data",
+    //     "auth-token": localStorage.getItem("jwl_token"),
+    //   },
+    // };
 
-    post(url, formData, config).then(
-      (response) => {
-        setOpenUpload(false);
-      },
-      (error) => {
-        // setSuccess(true);
-      }
-    );
+    // post(url, formData, config).then(
+    //   (response) => {
+    //     setOpenUpload(false);
+    //   },
+    //   (error) => {
+    //     // setSuccess(true);
+    //   }
+    // );
   };
   const toggleCategory = (type: 'scooter' | 'motorcycle') => {
     setCategory((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -1713,7 +1713,7 @@ const Dashboard = (props) => {
           ) : (
             <View style={{ height: "100%" }}>
               <ScrollView>
-                <View style={MyStyles.row}>
+                <View style={[MyStyles.row, { fontSize: 12 }]}> 
                   <View style={{ flex: 1, paddingHorizontal: 10 }}>
                     <View style={MyStyles.row}>
                       <TextInput
@@ -1738,40 +1738,53 @@ const Dashboard = (props) => {
                         data={staffList}
                         placeholder="Staff"
                         onChange={(val) => setUpload({ ...upload, staff_id: val })}
-                        style={MyStyles.dropdown} // try this
+                        style={{
+                          borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 6,
+      paddingHorizontal: 2,
+      fontSize: 12,
+      marginBottom: 2,
+      minWidth: 150,
+                        }}
                       // or containerStyle={MyStyles.dropdownContainer} depending on what your component supports
                       />
                     </View>
 
 
-                    <Text style={[MyStyles.sectionLabel, { marginTop: 16 }]}>Category</Text>
-                    <View style={MyStyles.checkboxContainer}>
+                    <Text style={{fontSize: 16, fontWeight: 'bold', color: '#000', marginVertical: 6}}>Category</Text>
+                    <View style={[MyStyles.checkboxContainer, { fontSize: 12 }]}>
                       <Pressable onPress={() => toggleCategory('scooter')} style={MyStyles.checkboxRow}>
                         <View style={[MyStyles.checkbox, category.scooter && MyStyles.checked]}>
                           {category.scooter && <Text style={MyStyles.tick}>✓</Text>}
                         </View>
-                        <Text style={MyStyles.checkboxLabel}>SCOOTER</Text>
+                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>SCOOTER</Text>
                       </Pressable>
 
                       <Pressable onPress={() => toggleCategory('motorcycle')} style={MyStyles.checkboxRow}>
                         <View style={[MyStyles.checkbox, category.motorcycle && MyStyles.checked]}>
                           {category.motorcycle && <Text style={MyStyles.tick}>✓</Text>}
                         </View>
-                        <Text style={MyStyles.checkboxLabel}>MOTORCYCLE</Text>
+                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>MOTORCYCLE</Text>
                       </Pressable>
-                      <View></View>
+                      <Pressable onPress={() => toggleCategory('bike')} style={MyStyles.checkboxRow}>
+                        <View style={[MyStyles.checkbox, category.bike && MyStyles.checked]}>
+                          {category.bike && <Text style={MyStyles.tick}>✓</Text>}
+                        </View>
+                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>BIKE</Text>
+                      </Pressable>
                     </View>
 
-                    <Text style={MyStyles.sectionLabel}>Interest</Text>
-                    <View style={MyStyles.radioContainer}>
-                      {['yes', 'followup', 'requirement'].map((item) => (
+                    <Text style={{fontSize: 16, fontWeight: 'bold', color: '#000', marginVertical: 2, marginBottom: 6}}>Interest</Text>
+                    <View style={[MyStyles.radioContainer, { flexDirection: 'row', alignItems: 'center', gap: 16 }]}> 
+                      {['yes', 'followup', 'requirement'].map((item, idx, arr) => (
                         <Pressable
                           key={item}
                           onPress={() => setInterest(item)}
-                          style={MyStyles.radioRow}
+                          style={[MyStyles.radioRow, idx !== arr.length - 1 ? { marginRight: 40 } : null]}
                         >
                           <View style={interest === item ? MyStyles.radioSelected : MyStyles.radio} />
-                          <Text style={MyStyles.radioLabel}>
+                          <Text style={[MyStyles.radioLabel, { fontSize: 14 }]}>
                             {item === 'yes' ? 'Yes' : item === 'followup' ? 'Follow Up' : 'Requirement'}
                           </Text>
                         </Pressable>
@@ -1819,9 +1832,9 @@ const Dashboard = (props) => {
           <View style={{ height: "100%" }}>
             <ScrollView>
               <View style={[MyStyles.row, { justifyContent: "space-around" }]}>
-                {["scooter", "motorcycle"].map((catkey) =>
+                {["scooter", "motorcycle", "bike"].map((catkey) =>
                   category[catkey] ? (
-                    <View key={catkey} style={{ flex: 0.48 }}>
+                    <View key={catkey} style={{ flex: 0.30 }}>
                       <Text
                         style={{
                           backgroundColor: "#eee",
@@ -1877,21 +1890,21 @@ const Dashboard = (props) => {
                           style={{ flex: 1, marginRight: 6 }}
                           buttonColor="#1abc9c"
                           textColor="#fff"
-                          onPress={async () => {
-                            try {
-                              const result = await DocumentPicker.pick({
-                                type: [DocumentPicker.types.images],
-                                copyTo: "documentPickerDir",
-                              });
-                              console.log("Selected file:", result);
-                            } catch (err) {
-                              if (DocumentPicker.isCancel(err)) {
-                                console.log("User cancelled the picker");
-                              } else {
-                                console.log("Error picking file:", err);
-                              }
-                            }
-                          }}
+                          // onPress={async () => {
+                          //   try {
+                          //     const result = await DocumentPicker.pick({
+                          //       type: [DocumentPicker.types.images],
+                          //       copyTo: "documentPickerDir",
+                          //     });
+                          //     console.log("Selected file:", result);
+                          //   } catch (err) {
+                          //     if (DocumentPicker.isCancel(err)) {
+                          //       console.log("User cancelled the picker");
+                          //     } else {
+                          //       console.log("Error picking file:", err);
+                          //     }
+                          //   }
+                          // }}
                         >
                           Add Images
                         </Button>
@@ -1900,7 +1913,7 @@ const Dashboard = (props) => {
                           compact
                           buttonColor="#3498db"
                           icon="upload"
-                          onPress={uploadImageFunc}
+                          // onPress={uploadImageFunc}
                         />
                       </View>
 
@@ -1918,34 +1931,34 @@ const Dashboard = (props) => {
                         compact
                         style={{ marginBottom: 10 }}
                         buttonColor="#007BFF"
-                        onPress={async () => {
-                            // const response = await fetch("/customervisit/SkuImage", {
-                            //   method: "POST",
-                            //   headers: {
-                            //     "Content-Type": "application/json",
-                            //     // Include authorization header if needed
-                            //     // "Authorization": "Bearer YOUR_TOKEN"
-                            //   },
-                           const payload={
-                            branch_id: upload.branch_id,
-                            sku: upload.sku,
-                            };
-                            // });
-                            postRequest("customervisit/SkuImage", payload, token)
-                            .then((response) => {
-                              if (response.status === 200) {
-                                console.log("✅ Extra point added successfully:", response.data);
-                                // Optionally show a toast or close modal
-                              } else {
-                                console.warn("❌ Failed to add extra point:", response.message);
-                              }
-                            })
-                            // const data = await response.json();
-                            // Do something with the image data here (e.g., set it to state)
-                            .catch((error) => {
-                              console.error("🚨 Error adding extra point:", error);
-                            });
-                        }}
+                        // onPress={async () => {
+                        //     // const response = await fetch("/customervisit/SkuImage", {
+                        //     //   method: "POST",
+                        //     //   headers: {
+                        //     //     "Content-Type": "application/json",
+                        //     //     // Include authorization header if needed
+                        //     //     // "Authorization": "Bearer YOUR_TOKEN"
+                        //     //   },
+                        //    const payload={
+                        //     branch_id: upload.branch_id,
+                        //     sku: upload.sku,
+                        //     };
+                        //     // });
+                        //     postRequest("customervisit/SkuImage", payload, token)
+                        //     .then((response) => {
+                        //       if (response.status === 200) {
+                        //         console.log("✅ Extra point added successfully:", response.data);
+                        //         // Optionally show a toast or close modal
+                        //       } else {
+                        //         console.warn("❌ Failed to add extra point:", response.message);
+                        //       }
+                        //     })
+                        //     // const data = await response.json();
+                        //     // Do something with the image data here (e.g., set it to state)
+                        //     .catch((error) => {
+                        //       console.error("🚨 Error adding extra point:", error);
+                        //     });
+                        // }}
                       >
                         FETCH IMAGE
                       </Button>
