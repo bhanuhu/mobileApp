@@ -15,6 +15,7 @@ import RedeemPoints from './RedeemPoints';
 import ExpirePoints from './ExpirePoints';  
 const { width } = Dimensions.get('window');
 import { postRequest } from '../../Services/RequestServices';
+import DropDown from '../../Components/DropDown';
 
 const Points = ({
   visible,
@@ -27,6 +28,7 @@ const Points = ({
   expiredPoints,
   cusomerId,
   token,
+  staffList,
 }) => {
   const [redeemingPoints, setRedeemingPoints] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -128,13 +130,33 @@ const Points = ({
                 {/* Right Column */}
                 <View style={styles.formCol}>
                   <Text style={styles.label}>Staff Name</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Select Staff Name"
-                    value={staffName}
-                    onChangeText={setStaffName}
-                    placeholderTextColor="#999"
-                  />
+                  <View style={styles.formCol}>
+                    <DropDown
+                      ext_lbl="name"
+                      ext_val="staff_id"
+                      data={staffList}
+                      placeholder="Select Staff"
+                      onChange={setStaffName}
+                      value={staffName}
+                      style={[styles.input, {
+                        height: 47,
+                        paddingVertical: 10,
+                        justifyContent: 'center',
+                        marginBottom: 20,
+                      }]}
+                      // dropDownContainerStyle={{
+                      //   borderColor: '#d6d6d6',
+                      //   marginTop: 4,
+                      //   borderRadius: 8,
+                      // }}
+                      // placeholderStyle={{
+                      //   color: '#999',
+                      //   fontSize: 15,
+                      //   padding: 0,
+                      //   margin: 0,
+                      // }}
+                    />
+                  </View>
                 </View>
               </View>
 

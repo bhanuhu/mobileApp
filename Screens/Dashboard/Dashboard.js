@@ -28,8 +28,7 @@ import { postRequest, uploadImage } from "../../Services/RequestServices";
 import MyStyles from "../../Styles/MyStyles";
 import DatePicker from "../../Components/DatePicker";
 import RedeemModal from "./RedeemModal";
-// import * as ImagePicker from 'react-native-image-picker';
-// import * as DocumentPicker from 'react-native-document-picker'; 
+import * as ImagePicker from "expo-image-picker";
 
 const Dashboard = (props) => {
   const { branchId, branchName, logoPath, token } = props.loginDetails;
@@ -38,24 +37,7 @@ const Dashboard = (props) => {
     scooter: false,
     motorcycle: true,
   });
-  const uploadImageFunc = (formData) => {
-    // const url = `/customervisit/UploadCustomerImage`;
-    // const config = {
-    //   headers: {
-    //     "content-type": "multipart/form-data",
-    //     "auth-token": localStorage.getItem("jwl_token"),
-    //   },
-    // };
-
-    // post(url, formData, config).then(
-    //   (response) => {
-    //     setOpenUpload(false);
-    //   },
-    //   (error) => {
-    //     // setSuccess(true);
-    //   }
-    // );
-  };
+  
   const toggleCategory = (type: 'scooter' | 'motorcycle') => {
     setCategory((prev) => ({ ...prev, [type]: !prev[type] }));
   };
@@ -158,7 +140,8 @@ const Dashboard = (props) => {
         console.error("Invalid API response for StaffList", resp);
         return;
       }
-      if (resp.status == 200) {
+      if (resp.status == 200) { 
+        console.log("StaffList", resp.data);
         setStaffList(resp.data);
       }
     }).catch((err) => {
@@ -1121,7 +1104,7 @@ const Dashboard = (props) => {
               </View>
             </View>
           ) : (
-            <RedeemModal visible={modal.redeem} onClose ={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null);}} points={points} redeem={redeem} expiredPoints={expiredPoints} redeemPoints={redeemPoints} voucherList={voucherList} token={token}/>
+            <RedeemModal visible={modal.redeem} onClose ={() => {setModal({ ...modal, redeem: false }); setRedeem(null); setPoints(null);}} points={points} redeem={redeem} expiredPoints={expiredPoints} redeemPoints={redeemPoints} voucherList={voucherList} token={token} staffList={staffList}/>
           )
         }
       />
@@ -1747,7 +1730,6 @@ const Dashboard = (props) => {
       marginBottom: 2,
       minWidth: 150,
                         }}
-                      // or containerStyle={MyStyles.dropdownContainer} depending on what your component supports
                       />
                     </View>
 
@@ -1855,21 +1837,66 @@ const Dashboard = (props) => {
 
                       {/* File Picker Button */}
                       <View style={MyStyles.row}>
-                        <Button
-                          mode="contained"
-                          compact
-                          style={{ flex: 1, marginRight: 6 }}
-                          buttonColor="#1abc9c"
-                          textColor="#fff"
-                        >
-                          Choose Files
-                        </Button>
+
+<Button
+  mode="contained"
+  compact
+  style={{ flex: 1, marginRight: 6 }}
+  buttonColor="#1abc9c"
+  textColor="#fff"
+  onPress={async () => {
+    try {
+      // Request media library permissions
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        alert("Permission to access camera roll is required!");
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.cancelled && result.assets && result.assets.length > 0) {
+        const image = result.assets[0];
+
+        const formData = new FormData();
+        formData.append("image", {
+          uri: image.uri,
+          name: "photo.jpg",
+          type: "image/jpeg",
+        });
+
+        const response = await uploadImage(
+          "customervisit/UploadCustomerImage",
+          formData,
+          token // replace with your actual token
+        );
+
+        console.log("Upload response:", response);
+        setUpload({ ...upload, image_path: response.image_path });77
+        alert("Image uploaded successfully!");
+      }
+    } catch (error) {
+      console.error("Error picking or uploading image:", error);
+      alert("Failed to upload image.");
+    }
+  }}
+>
+  Choose Files
+</Button>
+
                       </View>
 
                       {/* Image */}
                       <Image
                         source={{
-                          uri:
+                          uri:upload?.image_path?upload?.image_path:
                             catkey === "scooter"
                               ? "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png"
                               : "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg",
@@ -1931,35 +1958,25 @@ const Dashboard = (props) => {
                         compact
                         style={{ marginBottom: 10 }}
                         buttonColor="#007BFF"
-                        // onPress={async () => {
-                        //     // const response = await fetch("/customervisit/SkuImage", {
-                        //     //   method: "POST",
-                        //     //   headers: {
-                        //     //     "Content-Type": "application/json",
-                        //     //     // Include authorization header if needed
-                        //     //     // "Authorization": "Bearer YOUR_TOKEN"
-                        //     //   },
-                        //    const payload={
-                        //     branch_id: upload.branch_id,
-                        //     sku: upload.sku,
-                        //     };
-                        //     // });
-                        //     postRequest("customervisit/SkuImage", payload, token)
-                        //     .then((response) => {
-                        //       if (response.status === 200) {
-                        //         console.log("✅ Extra point added successfully:", response.data);
-                        //         // Optionally show a toast or close modal
-                        //       } else {
-                        //         console.warn("❌ Failed to add extra point:", response.message);
-                        //       }
-                        //     })
-                        //     // const data = await response.json();
-                        //     // Do something with the image data here (e.g., set it to state)
-                        //     .catch((error) => {
-                        //       console.error("🚨 Error adding extra point:", error);
-                        //     });
-                        // }}
-                      >
+                        onPress={async () => {
+                          try {
+                            const payload = {
+                              branch_id: upload.branch_id,
+                              sku: upload.sku,
+                            };
+                        
+                            const response = await postRequest("customervisit/SkuImage", payload, token);
+                            console.log("response",response);
+                            if (response?.status === 200 && response?.valid===false) {
+                              alert("No Image Found")
+                            } else {
+                              console.warn("❌ Failed to fetch image:", response?.message || 'Unknown error');
+                            }
+                          } catch (error) {
+                            console.error("🚨 Error fetching image:", error);
+                          }
+                        }}
+>                        
                         FETCH IMAGE
                       </Button>
 
@@ -2043,17 +2060,17 @@ const Dashboard = (props) => {
     full_name: upload?.full_name || '',
     remarks: upload?.remarks || '',
     sku: upload?.sku || '',
-    image_path: upload?.image_path || '',
+    image_path: !upload?.image_path?catkey==='scooter'?'image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png':'image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg':upload?.image_path,
     appointment_date: upload?.appointment_date || '',
     payment: upload?.payment || '',
-    color: upload?.color || '',
-    payment_mode: upload?.payment_mode || '',
     sub_category: upload?.sub_category || '',
     interest: upload?.interest || 'Yes',
-    staff_id: upload?.staff_id || '',
-    category_id: upload?.category_id || '',
+    staff_id: upload?.staff_id || '1069',
+    category_id: upload?.category_id || '2180',
   };
   try {
+    console.log("upload",upload);
+    console.log("payload",payload);
     const resp = await postRequest(
       'customervisit/insertCustomerUpload',
       payload,

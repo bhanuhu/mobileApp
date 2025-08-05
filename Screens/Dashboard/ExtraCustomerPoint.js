@@ -16,7 +16,7 @@ import ExpirePoints from './ExpirePoints';
 const { width } = Dimensions.get('window');
 import { Divider } from 'react-native-paper';
 import { postRequest } from '../../Services/RequestServices';
-
+import DropDown from '../../Components/DropDown';
 const ExtraCustomerPoint = ({
   token,
   cusomerId,
@@ -28,6 +28,7 @@ const ExtraCustomerPoint = ({
   data,
   redeemPoints,
   expiredPoints,
+  staffList,
 }) => {
   const [redeemingPoints, setRedeemingPoints] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -105,13 +106,18 @@ const ExtraCustomerPoint = ({
                 {/* Right Column */}
                 <View style={styles.formCol}>
                   <Text style={styles.label}>Staff Name</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Select Staff Name"
-                    value={staffName}
-                    onChangeText={setStaffName}
-                    placeholderTextColor="#999"
-                  />
+                  <DropDown
+                                      ext_lbl="name"
+                                      ext_val="staff_id"
+                                      data={staffList}
+                                      placeholder="Select Staff"
+                                      onChange={setStaffName}
+                                      style={{
+                                        borderColor: '#ccc',
+                                        borderWidth: 1,
+                                        borderRadius: 6,
+                                      }}
+                                    />
                 </View>
               </View>
 
