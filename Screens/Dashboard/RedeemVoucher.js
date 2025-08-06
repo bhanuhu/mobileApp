@@ -19,7 +19,6 @@ const CustomerRedeemModal = ({
 
   return (
     <Portal>
-    {console.log("redeem-----",redeem,filteredRedeem)}
 
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <View style={styles.customerInfo}>

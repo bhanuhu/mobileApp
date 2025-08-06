@@ -55,7 +55,6 @@ const Points = ({
     
       postRequest(endpoint, payload, token)
         .then((response) => {
-          console.log('Success:', response);
           // handle success UI here
           alert("Add Extra Point Successfully");
         })

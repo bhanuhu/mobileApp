@@ -28,6 +28,12 @@ import DatePicker from "../../Components/DatePicker";
 import RedeemModal from "./RedeemModal";
 import * as ImagePicker from "expo-image-picker";
 import UploadModal from "./UploadModal";
+import { serviceUrl, imageUrl } from "../../Services/Constants";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import InterestYes from "./InterestYes";
+import InterestFollowUp from "./InterestFollowUp";
+import InterestRequirement from "./InterestRequirement";
+
 
 const Dashboard = (props) => {
   const { branchId, branchName, logoPath, token } = props.loginDetails;
@@ -50,8 +56,11 @@ const Dashboard = (props) => {
   
   const [payloadData, setPayloadData] = useState([]);
   
-
- 
+  const categoryImage = {
+    scooter: "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png",
+    motorcycle: "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg",
+    bike: "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg",
+  };
   const toggleCategory = (type) => {
     const isSelected = !category[type];
     const categoryId = CATEGORY_IDS[type];
@@ -73,7 +82,7 @@ const Dashboard = (props) => {
           full_name: upload?.full_name || '',
           remarks: upload?.remarks || '',
           sku: upload?.sku || '',
-          image_path: "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png",
+          image_path: {"choose":"", "add":[], "fetchSku":"", "url":categoryImage[type]},
           appointment_date: upload?.appointment_date || '',
           payment: upload?.payment || '',
           sub_category: upload?.sub_category || '',
@@ -92,6 +101,11 @@ const Dashboard = (props) => {
   useEffect(() => {
     console.log("Updated payloadData:", payloadData);
   }, [payloadData]);
+
+  useEffect(() => {
+    console.log("Updated interest:", interest);
+  }, [interest]);
+  
   
   
   const options = [
@@ -118,65 +132,49 @@ const Dashboard = (props) => {
   const [expiredPoints, setExpiredPoints] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  // FIRST BUTTON: CHOOSE FILES
-  const handleChooseFiles = async () => {
-    try {
-      const results = await DocumentPicker.pickMultiple({
-        type: DocumentPicker.types.allFiles, // or .images if you want only images
+  
+    const [image, setImage] = useState([]);
+  
+    const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true, // For multiple selection (if supported by platform)
       });
-      setSelectedFiles(results);
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('User cancelled file picker');
-      } else {
-        console.error('Error picking files:', err);
-        Alert.alert('Error', 'Something went wrong while selecting files');
+    
+    
+      if (!result.cancelled) {
+        const uriList = result.selected ? result.selected.map(item => item.uri) : [result.uri];
+    
+        setImage((prevImages) => [...prevImages, ...uriList]);
       }
-    }
-  };
-
-  // SECOND BUTTON: SUBMIT FILES
-  const handleSubmitFiles = async () => {
-    if (selectedFiles.length === 0) {
-      Alert.alert('No files selected');
-      return;
-    }
-
-    const formData = new FormData();
-
-    selectedFiles.forEach((file, index) => {
-      formData.append('files', {
-        uri: file.uri,
-        type: file.type || 'application/octet-stream',
-        name: file.name || `file-${index}`,
-      });
-    });
-
-    try {
-      const response = await fetch('https://your-api-url.com/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          // 'auth-token': token, // include if needed
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        console.log('✅ Upload success:', result);
-        Alert.alert('Success', 'Files uploaded successfully');
-        setSelectedFiles([]); // clear selection
-      } else {
-        console.warn('❌ Upload failed:', result.message);
-        Alert.alert('Failed', result.message || 'Upload failed');
+    };
+    
+    const handleUpload = async () => {
+      if (!image || image.length === 0) {
+        alert("Please select at least one image first.");
+        return;
       }
-    } catch (error) {
-      console.error('🚨 Upload error:', error);
-      Alert.alert('Error', 'Something went wrong during upload');
-    }
-  };
+    
+      const formData = new FormData();
+    
+      image.forEach((uri, index) => {
+        formData.append("images", {
+          uri,
+          type: "image/jpeg",
+          name: `upload_${index}.jpg`,
+        });
+      });
+    
+      try {
+        const response = await uploadImage("/upload", formData, token); // use actual route
+        console.log("Upload response", response);
+      } catch (error) {
+        console.error("Upload failed", error);
+      }
+    };
+    
+  
+
 
   const subCategoryData =
     category === "SCOOTER"
@@ -188,10 +186,7 @@ const Dashboard = (props) => {
         { label: "APACHE", value: "APACHE" },
         { label: "SPORTS", value: "SPORTS" },
       ];
-  const imageUrl =
-    category === "SCOOTER"
-      ? "https://api.quicktagg.com/CustomerUploads/image-3c8744d8-9bd3-493a-bfb4-8c72cd086b18.png"
-      : "https://api.quicktagg.com/CustomerUploads/image-4301b3d1-b65e-483d-a1c2-470f005e9a7c.jpg";
+ 
 
   const [join, setJoin] = useState({
     customer_id: "0",
@@ -294,7 +289,6 @@ const Dashboard = (props) => {
     if (index >= bannerImages.length - 1) {
       index = -1;
     }
-    // console.log(index);
     setImageUri(bannerImages[index + 1]);
     if (imageRef) {
       imageRef.current.animate({ 0: { opacity: 0 }, 1: { opacity: 1 } });
@@ -310,6 +304,10 @@ const Dashboard = (props) => {
     };
   }, [imageUri]);
 
+  useEffect(() => {
+    console.log("Modal", modal);
+  }, [modal]);
+  
   // --UseEffect For Recent Visits--
 
   useEffect(() => {
@@ -361,7 +359,6 @@ const Dashboard = (props) => {
             size={23}
             onPress={() => {
               postRequest("customervisit/getNotification", {}, token).then((resp) => {
-                console.log(resp);
                 if (resp.status == 200) {
                   setNotifications(resp.data);
                   setModal({ ...modal, notification: true });
@@ -1138,7 +1135,6 @@ const Dashboard = (props) => {
                   uppercase={false}
                   compact
                   onPress={() => {
-                    console.log("modal.mobile", modal.mobile);
                     postRequest(
                       "customervisit/getCustomerVisit",
                       { mobile: modal.mobile },
@@ -1146,10 +1142,8 @@ const Dashboard = (props) => {
                     ).then((resp) => {
                       if (resp?.status === 200) {
                         const customerData = resp.data;
-                        console.log("VoucherList", customerData);
                         setVoucherList(customerData);
                         setCustomerId(customerData[0].customer_id);
-                        console.log("customerId", customerData[0].customer_id);
 
                         // 1️⃣ Fetch customer points
                         postRequest(
@@ -1161,7 +1155,6 @@ const Dashboard = (props) => {
                           token
                         ).then((pointResp) => {
                           if (pointResp?.status === 200) {
-                            console.log("Active points:", pointResp.data);
                             setPoints(pointResp.data);
 
                             // 2️⃣ Fetch expired points
@@ -1174,8 +1167,7 @@ const Dashboard = (props) => {
                               token
                             ).then((expirePointResp) => {
                               if (expirePointResp?.status === 200) {
-                                console.log("Expired Points:", expirePointResp.data);
-                                setExpiredPoints?.(expirePointResp.data); // only if this state exists
+                                setExpiredPoints?.(expirePointResp.data);
 
                                 // 3️⃣ Fetch customer redeem points
                                 postRequest(
@@ -1187,7 +1179,6 @@ const Dashboard = (props) => {
                                   token
                                 ).then((redeemPointResp) => {
                                   if (redeemPointResp?.status === 200) {
-                                    console.log("Redeemed Points:", redeemPointResp.data);
                                     setRedeemPoints(redeemPointResp.data);
 
                                     // 4️⃣ Fetch customer vouchers
@@ -1200,7 +1191,6 @@ const Dashboard = (props) => {
                                       token
                                     ).then((voucherResp) => {
                                       if (voucherResp?.status === 200) {
-                                        console.log("Redeem List:-----", voucherResp.data);
                                         setRedeem(voucherResp.data);
                                         setModal({ ...modal, redeem: true });
                                       }
@@ -1351,7 +1341,6 @@ const Dashboard = (props) => {
                           token
                         ).then((resp) => {
                           if (resp?.status == 200) {
-                            console.log(resp.data[0].customer_id);
                             setJoin({
                               ...join,
                               ref_id: resp.data[0].customer_id,
@@ -1448,7 +1437,6 @@ const Dashboard = (props) => {
                   onPress={() => {
                     postRequest("customervisit/insertNewCustomerVisit", join, token).then(
                       (resp) => {
-                        console.log(resp);
                         if (resp?.status == 200) {
                           setModal({ ...modal, join: false });
                           setJoin({});
@@ -1583,7 +1571,6 @@ const Dashboard = (props) => {
                       },
                       token
                     ).then((resp) => {
-                      //console.log(resp);
                       if (resp?.status == 200) {
                         postRequest(
                           "customervisit/insertCustomerVisit",
@@ -1802,7 +1789,6 @@ const Dashboard = (props) => {
                           image_data: "",
                           uri: require("../../assets/upload.png"),
                         });
-                        console.log(resp.data);
                       }
                     });
                   }}
@@ -1853,90 +1839,53 @@ const Dashboard = (props) => {
                     </View>
 
 
-                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000', marginVertical: 6 }}>Category</Text>
-                    {/* <View style={[MyStyles.checkboxContainer, { fontSize: 12 }]}> */}
-                      {/* <Pressable onPress={() => {toggleCategory('scooter'); setPayloadData({...payloadData, payload:{...payloadData.payload, category_id: "2180"}}); console.log(payloadData)}} style={MyStyles.checkboxRow}>
-                      <Pressable
-  onPress={() => {
-    toggleCategory('scooter');
+                      <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000', marginVertical: 6 }}>Category</Text>
+                      <View style={[MyStyles.checkboxContainer, { fontSize: 12 }]}>
+                        <Pressable onPress={() => toggleCategory('scooter')} style={MyStyles.checkboxRow}>
+                          <View style={[MyStyles.checkbox, category.scooter && MyStyles.checked]}>
+                            {category.scooter && <Text style={MyStyles.tick}>✓</Text>}
+                          </View>
+                          <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>SCOOTER</Text>
+                        </Pressable>
 
-    setPayloadData(prev => {
-      const updated = [...prev];
-      const lastIndex = updated.length - 1;
-      if (lastIndex >= 0) {
-        updated[lastIndex] = {
-          ...updated[lastIndex],
-          category_id: '2180',
-        };
-      }
-      return updated;
-    }).then((resp) => {
-      console.log("payloadDatagaxay",resp);
-    });
+                        <Pressable onPress={() => toggleCategory('motorcycle')} style={MyStyles.checkboxRow}>
+                          <View style={[MyStyles.checkbox, category.motorcycle && MyStyles.checked]}>
+                            {category.motorcycle && <Text style={MyStyles.tick}>✓</Text>}
+                          </View>
+                          <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>MOTORCYCLE</Text>
+                        </Pressable>
 
-    console.log("payloadData",payloadData);
-  }}
-  style={MyStyles.checkboxRow}
->
-
-                        <View style={[MyStyles.checkbox, category.scooter && MyStyles.checked]}>
-                          {category.scooter && <Text style={MyStyles.tick}>✓</Text>}
-                        </View>
-                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>SCOOTER</Text>
-                      </Pressable>
-
-                      <Pressable onPress={() => {toggleCategory('motorcycle'); console.log("payloadhgjjghData",payloadData)}} style={MyStyles.checkboxRow}>
-                        <View style={[MyStyles.checkbox, category.motorcycle && MyStyles.checked]}>
-                          {category.motorcycle && <Text style={MyStyles.tick}>✓</Text>}
-                        </View>
-                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>MOTORCYCLE</Text>
-                      </Pressable>
-                      <Pressable onPress={() => { toggleCategory('bike'); }} style={MyStyles.checkboxRow}>
-                        <View style={[MyStyles.checkbox, category.bike && MyStyles.checked]}>
-                          {category.bike && <Text style={MyStyles.tick}>✓</Text>}
-                        </View>
-                        <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>BIKE</Text>
-                      </Pressable>
-                    </View> */}
-                    <View style={[MyStyles.checkboxContainer, { fontSize: 12 }]}>
-  <Pressable onPress={() => toggleCategory('scooter')} style={MyStyles.checkboxRow}>
-    <View style={[MyStyles.checkbox, category.scooter && MyStyles.checked]}>
-      {category.scooter && <Text style={MyStyles.tick}>✓</Text>}
-    </View>
-    <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>SCOOTER</Text>
-  </Pressable>
-
-  <Pressable onPress={() => toggleCategory('motorcycle')} style={MyStyles.checkboxRow}>
-    <View style={[MyStyles.checkbox, category.motorcycle && MyStyles.checked]}>
-      {category.motorcycle && <Text style={MyStyles.tick}>✓</Text>}
-    </View>
-    <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>MOTORCYCLE</Text>
-  </Pressable>
-
-  <Pressable onPress={() => toggleCategory('bike')} style={MyStyles.checkboxRow}>
-    <View style={[MyStyles.checkbox, category.bike && MyStyles.checked]}>
-      {category.bike && <Text style={MyStyles.tick}>✓</Text>}
-    </View>
-    <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>BIKE</Text>
-  </Pressable>
-</View>
+                        <Pressable onPress={() => toggleCategory('bike')} style={MyStyles.checkboxRow}>
+                          <View style={[MyStyles.checkbox, category.bike && MyStyles.checked]}>
+                            {category.bike && <Text style={MyStyles.tick}>✓</Text>}
+                          </View>
+                          <Text style={[MyStyles.checkboxLabel, { fontSize: 12 }]}>BIKE</Text>
+                        </Pressable>
+                      </View>
 
 
                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000', marginVertical: 2, marginBottom: 6 }}>Interest</Text>
                     <View style={[MyStyles.radioContainer, { flexDirection: 'row', alignItems: 'center', gap: 16 }]}>
-                      {['yes', 'followup', 'requirement'].map((item, idx, arr) => (
-                        <Pressable
-                          key={item}
-                          onPress={() => setInterest(item)}
-                          style={[MyStyles.radioRow, idx !== arr.length - 1 ? { marginRight: 40 } : null]}
-                        >
-                          <View style={interest === item ? MyStyles.radioSelected : MyStyles.radio} />
-                          <Text style={[MyStyles.radioLabel, { fontSize: 14 }]}>
-                            {item === 'yes' ? 'Yes' : item === 'followup' ? 'Follow Up' : 'Requirement'}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
+  {['yes', 'followup', 'requirement'].map((item, idx, arr) => (
+    <Pressable
+      key={item}
+      onPress={() => {
+        setInterest(item);
+        console.log(`Interest selected: ${item}`);
+      }}
+      style={[
+        MyStyles.radioRow,
+        idx !== arr.length - 1 ? { marginRight: 40 } : null,
+      ]}
+    >
+      <View style={interest === item ? MyStyles.radioSelected : MyStyles.radio} />
+      <Text style={[MyStyles.radioLabel, { fontSize: 14 }]}>
+        {item === 'yes' ? 'Yes' : item === 'followup' ? 'Follow Up' : 'Requirement'}
+      </Text>
+    </Pressable>
+  ))}
+</View>
+
 
 
                   </View>
@@ -1961,7 +1910,11 @@ const Dashboard = (props) => {
                   uppercase={false}
                   compact
                   onPress={() => {
+                    if(payloadData.length > 0){
                     setModal({ ...modal, uploadNext: true, checkIn: false, upload: false });
+                    }else{
+                      alert("Please select at least one category");
+                    }
                   }}
                 >
                   NEXT
@@ -1973,279 +1926,20 @@ const Dashboard = (props) => {
       />
 
       {/*------------ Upload Next Modal ------------------- */}
-      <CustomModal
-        visible={modal.uploadNext}
-        content={
-          <View style={{ height: "100%" }}>
-            <ScrollView>
-              <View style={[MyStyles.row, { justifyContent: "space-around", flexWrap: 'wrap' }]}>
-  {payloadData.map((payload, index) => (
-    <View key={index} style={{ flex: 0.30, marginBottom: 20 }}>
-      <Text
-        style={{
-          backgroundColor: "#eee",
-          textAlign: "center",
-          paddingVertical: 6,
-          fontWeight: "bold",
-          color: "#999",
-          borderTopLeftRadius: 6,
-          borderTopRightRadius: 6,
-          marginBottom: 6,
-        }}
-      >
-        Category{'\n'}
-        <Text style={{ fontSize: 18, color: "#333" }}>
-          {payload.category_id === "2180"
-            ? "SCOOTER"
-            : payload.category_id === "2181"
-            ? "MOTORCYCLE"
-            : "BIKE"}
-        </Text>
-      </Text>
-
-      {/* Choose Files Button */}
-      <Button
-      mode="contained"
-      compact
-      style={{ flex: 1, marginBottom: 10 }}
-      buttonColor="#1abc9c"
-      textColor="#fff"
-      onPress={() => {
-        ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 1,
-        }).then((result) => {
-          console.log("ImagePicker result:", result);
-      
-          if (!result.cancelled) {
-            const image = result.uri;
-      
-            const formData = new FormData();
-            formData.append("files", {
-              uri: image,
-              name: "photo.jpg",
-              type: "image/jpeg",
-            });
-      
-            uploadImage("customervisit/UploadCustomerImage", formData, token)
-              .then((response) => {
-                setPayloadData((prev) => {
-                  const updated = [...prev];
-                  updated[index] = {
-                    ...updated[index],
-                    image_path: image, // even if undefined
-                  };
-                  return updated;
-                });
-              })
-              .catch((error) => {
-                console.error("Upload error:", error);
-              });
-          }
-        }).catch((err) => {
-          console.error("ImagePicker error:", err);
-        });
-      }}
-      
-    >
-      Choose Files
-    </Button>
-
-    {/* Dynamic Image Below */}
-    <Image
-      source={{
-        uri: payload.image_path
-      }}
-      style={{
-        height: 130,
-        width: "100%",
-        marginVertical: 10,
-        resizeMode: "contain",
-      }}
-    />
-
-      {/* SKU Input */}
-      <TextInput
-        mode="outlined"
-        label="SKU"
-        style={{ backgroundColor: "#fff", marginBottom: 10 }}
-        value={payload.sku}
-        onChangeText={(text) =>
-          setPayloadData((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], sku: text };
-            return updated;
-          })
-        }
-      />
-
-      {/* Remarks Input */}
-      <TextInput
-        mode="outlined"
-        label="Remarks"
-        style={{ backgroundColor: "#fff", marginBottom: 10 }}
-        value={payload.remarks}
-        onChangeText={(text) =>
-          setPayloadData((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], remarks: text };
-            return updated;
-          })
-        }
-      />
-
-      {/* Payment Input */}
-      <TextInput
-  mode="outlined"
-  label="Payment"
-  style={{ backgroundColor: "#fff", marginBottom: 10 }}
-  value={payload.payment}
-  keyboardType="numeric" // 👈 ensures numeric keyboard on mobile
-  onChangeText={(text) => {
-    const numericText = text.replace(/[^0-9]/g, ''); // 👈 strips non-numeric characters
-    setPayloadData((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], payment: numericText };
-      return updated;
-    });
-  }}
-/>
-
-
-      {/* Sub Category Dropdown */}
-      <DropDown
-        data={
-          payload.category_id === "2180"
-            ? [
-                { label: "JUPITER", value: "JUPITER" },
-                { label: "PEP", value: "PEP" },
-              ]
-            : [
-                { label: "APACHE", value: "APACHE" },
-                { label: "SPORTS", value: "SPORTS" },
-              ]
-        }
-        placeholder="Sub Category"
-        value={payload.sub_category}
-        onChangeText={(text) =>
-          setPayloadData((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], sub_category: text };
-            return updated;
-          })
-        }
-        style={MyStyles.dropdown}
-      />
-    </View>
-  ))}
-</View>
-
-
-            </ScrollView>
-
-            {/* Bottom Buttons */}
-            <View
-              style={[
-                MyStyles.row,
-                {
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                  gap: 8,
-                  padding: 10,
-                },
-              ]}
-            >
-              <Button
-                mode="contained"
-                color="#DC143C"
-                uppercase={false}
-                compact
-                onPress={() => {
-                  setModal({ ...modal, upload: false, uploadNext: false, checkIn: false });
-                  setUpload(null);
-                  setCheckIn(false);
-                }}
-                style={MyStyles.button}
-              >
-                CANCEL
-              </Button>
-              <Button mode="contained" onPress={() => {
-                setModal({ ...modal, upload: true, uploadNext: false, checkIn: false });
-              }} color="#007BFF" compact style={MyStyles.button}>
-                BACK
-              </Button>
-              <Button mode="contained" color="#007BFF" style={MyStyles.button} compact 
-              onPress={async () => {
-                if (!Array.isArray(payloadData) || payloadData.length === 0) {
-                  Alert.alert('Error', 'No data to upload.');
-                  return;
-                }
-            
-                try {
-                  let allSuccessful = true;
-            
-                  for (let item of payloadData) {
-                    const payload = {
-                      tran_id: 0,
-                      customer_id: item?.customer_id || 0,
-                      mobile: item?.mobile || '',
-                      full_name: item?.full_name || '',
-                      remarks: item?.remarks || '',
-                      sku: item?.sku || '',
-                      image_path: item?.image_path,
-                      appointment_date: item?.appointment_date || '',
-                      payment: item?.payment || '',
-                      sub_category: item?.sub_category || '',
-                      interest: item?.interest || 'Yes',
-                      staff_id: item?.staff_id || '1069',
-                      category_id: item?.category_id || '2180',
-                    };
-            
-                    console.log("Uploading payload:", payload);
-            
-                    const resp = await postRequest(
-                      'customervisit/insertCustomerUpload',
-                      payload,
-                      token
-                    );
-            
-                    if (!(resp?.status === 200 && resp?.data && resp?.data[0]?.valid)) {
-                      allSuccessful = false;
-                      console.error("Upload failed for:", payload);
-                    }
-                  }
-            
-                  if (allSuccessful) {
-                    Alert.alert('Success', 'All uploads successful!');
-                    setModal({ ...modal, upload: false, uploadNext: false, checkIn: false });
-                    setCheckIn(false);
-                    setUpload(null);
-                    setPayloadData([]);
-                    setCategory({
-                      scooter: false,
-                      motorcycle: false,
-                      bike: false,
-                    });
-                    
-                  } else {
-                    Alert.alert('Partial Success', 'Some uploads failed. Please check logs.');
-                  }
-                } catch (e) {
-                  console.error("Upload error:", e);
-                  Alert.alert('Error', 'Network or server error.');
-                }
-              }}
-              
-              >
-                CONTINUE
-              </Button>
-            </View>
-          </View>
-        }
-      />
-     
-
-
+      {modal.uploadNext && (
+  {
+    yes: (
+     <InterestYes  visible={modal.upload && interest?.toLowerCase().trim() === 'yes'} modal={modal} setModal={setModal} payloadData={payloadData} setPayloadData={setPayloadData} image={image} setImage={setImage} token={token} imageUrl={imageUrl} serviceUrl={serviceUrl} setCategory={setCategory} setUpload={setUpload} setCheckIn={setCheckIn} pickImage={pickImage} handleUpload={handleUpload} interest={interest} setInterest={setInterest}/>
+    ),
+    followup: (
+     <InterestFollowUp visible={modal.upload && interest?.toLowerCase().trim() === 'followup'} modal={modal} setModal={setModal} payloadData={payloadData} setPayloadData={setPayloadData} image={image} setImage={setImage} token={token} imageUrl={imageUrl} serviceUrl={serviceUrl} setCategory={setCategory} setUpload={setUpload} setCheckIn={setCheckIn} pickImage={pickImage} handleUpload={handleUpload} interest={interest} setInterest={setInterest}/>
+    ),
+    requirement: (
+     <InterestRequirement visible={modal.upload && interest?.toLowerCase().trim() === 'requirement'} modal={modal} setModal={setModal} payloadData={payloadData} setPayloadData={setPayloadData} image={image} setImage={setImage} token={token} imageUrl={imageUrl} serviceUrl={serviceUrl} setCategory={setCategory} setUpload={setUpload} setCheckIn={setCheckIn} pickImage={pickImage} handleUpload={handleUpload} interest={interest} setInterest={setInterest}/>
+    ),
+  }[interest?.toLowerCase().trim()] || null
+)}
+    
 
 
       {/*------------ Notification Modal ------------------- */}

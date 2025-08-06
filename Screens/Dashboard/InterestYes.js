@@ -1,4 +1,39 @@
-  <CustomModal
+import React from "react";
+import {
+  View,
+  ScrollView,
+  Text,
+  Image,
+  Alert,
+} from "react-native";
+import { Button, TextInput } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
+import Icon from "react-native-vector-icons/FontAwesome";
+import DropDown from "../../Components/DropDown";
+import CustomModal from "../../Components/CustomModal";
+import MyStyles from "../../Styles/MyStyles"; // Custom style file
+import { postRequest, uploadImage } from "../../Services/RequestServices";
+import { serviceUrl, imageUrl } from "../../Services/Constants";
+import { TouchableOpacity } from "react-native";
+
+const InterestYes = ({
+  modal,
+  setModal,
+  payloadData,
+  setPayloadData,
+  image,
+  setImage,
+  token,
+  imageUrl,
+  serviceUrl,
+  setCategory,
+  setUpload,
+  setCheckIn,
+  pickImage,
+  handleUpload
+}) => {
+  return (
+    <CustomModal
         visible={modal.uploadNext}
         content={
           <View style={{ height: "100%" }}>
@@ -111,7 +146,7 @@
     )}
     style={{
       backgroundColor: "#3699fe",
-      width: 50,
+      width: 40,
       minWidth: 0,
       alignSelf: "center",
       alignItems: "center",
@@ -129,27 +164,52 @@
   showsHorizontalScrollIndicator={false}
   contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 5 }}
 >
-  {image.map((uri, idx) => (
-    <View
-      key={idx}
+{image.map((uri, idx) => (
+  <View
+    key={idx}
+    style={{
+      marginRight: 10,
+      borderRadius: 8,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: "#ccc",
+      position: "relative",
+    }}
+  >
+    <Image
+      source={{ uri }}
       style={{
-        marginRight: 10,
-        borderRadius: 8,
-        overflow: "hidden",
-        borderWidth: 1,
-        borderColor: "#ccc",
+        height: 130,
+        width: 130,
+        resizeMode: "cover",
+      }}
+    />
+
+    <TouchableOpacity
+      onPress={() => {
+        // Remove image at index `idx`
+        const newImages = [...image];
+        newImages.splice(idx, 1);
+        setImage(newImages);
+      }}
+      style={{
+        position: "absolute",
+        top: 5,
+        right: 5,
+        backgroundColor: "rgba(0,0,0,0.6)",
+        borderRadius: 12,
+        width: 24,
+        height: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1,
       }}
     >
-      <Image
-        source={{ uri }}
-        style={{
-          height: 130,
-          width: 130,
-          resizeMode: "cover",
-        }}
-      />
-    </View>
-  ))}
+      <Text style={{ color: "white", fontSize: 16, lineHeight: 20 }}>×</Text>
+    </TouchableOpacity>
+  </View>
+))}
+
 </ScrollView>
 
       {/* SKU Input */}
@@ -240,7 +300,7 @@
         }
         placeholder="Sub Category"
         value={payload.sub_category}
-        onChangeText={(text) =>
+        onChange={(text) =>
           setPayloadData((prev) => {
             const updated = [...prev];
             updated[index] = { ...updated[index], sub_category: text };
@@ -325,7 +385,8 @@
                 CANCEL
               </Button>
               <Button mode="contained" onPress={() => {
-                setModal({ ...modal, upload: true, uploadNext: false, checkIn: false });
+                setModal({ ...modal, upload: true, uploadNext: false, checkIn: false })
+                ;
               }} color="#007BFF" compact style={MyStyles.button}>
                 BACK
               </Button>
@@ -416,3 +477,5 @@
           </View>
         }
       />
+  )}
+export default InterestYes;

@@ -52,13 +52,10 @@ const ExtraCustomerPoint = ({
   
     postRequest(endpoint, payload, token)
       .then((response) => {
-        console.log('Success:', response);
-        // handle success UI here
         alert("Add Extra Point Successfully");
       })
       .catch((error) => {
         console.error('Request failed:', error);
-        // handle error UI here
       });
   };
 

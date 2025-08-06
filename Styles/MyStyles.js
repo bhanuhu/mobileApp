@@ -135,13 +135,13 @@ const MyStyles = StyleSheet.create({
       fontSize: 16,
     },
     dropdown: {
-      borderColor: '#ccc',
       borderWidth: 1,
       borderRadius: 6,
       paddingHorizontal: 12,
       fontSize: 12,
       marginBottom: 10,
       minWidth: 150,
+      backgroundColor: 'white',
     },
     modalOverlay: {
       flex: 1,

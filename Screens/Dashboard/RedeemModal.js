@@ -16,7 +16,6 @@ const RedeemModal = ({ redeem, points, voucherList, visible, onClose, redeemPoin
     if (!visible) return null;
   return (
     <Portal>
-        {console.log("voucherList hi kehde",redeem)}
 <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
 <View style={styles.container}>
       <Text style={styles.header}>Customer Redeem Point System</Text>

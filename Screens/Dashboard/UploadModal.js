@@ -130,7 +130,6 @@ const UploadModal = ({ modal, setModal, token, upload, setUpload, category, setC
                           };
 
                           const response = await postRequest("customervisit/SkuImage", payload, token);
-                          console.log("response", response);
                           if (response?.status === 200 && response?.valid === false) {
                             alert("No Image Found");
                           } else {
