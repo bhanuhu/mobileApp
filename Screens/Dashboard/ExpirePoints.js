@@ -11,26 +11,52 @@ import {
   ScrollView,
 } from 'react-native';
 import { format, parseISO } from 'date-fns';
-
+import { useMemo, useState } from 'react';
 const { width } = Dimensions.get('window');
 
 // Sample record structure (not enforced in JS)
 const CustomerPointsModal = ({ visible, data, onClose }) => {
 
+  const [searchText, setSearchText] = useState('');
   /**
  * Converts a datetime string to a date string in 'yyyy-MM-dd' format using date-fns.
  * @param dateTime - An ISO 8601 datetime string (e.g., "2025-08-04T15:30:00Z")
  * @returns A formatted date string (e.g., "2025-08-04")
  */
-function formatToDate(dateTime) {
-  try {
-    const parsedDate = parseISO(dateTime);
-    return format(parsedDate, 'dd-MM-yyyy');
-  } catch (error) {
-    console.error('Invalid date format:', dateTime);
-    return '';
+  function formatToDate(dateTime) {
+    try {
+      const parsedDate = parseISO(dateTime);
+      return format(parsedDate, 'dd-MM-yyyy');
+    } catch (error) {
+      console.error('Invalid date format:', dateTime);
+      return '';
+    }
   }
-}
+
+  const filteredData = useMemo(() => {
+    if (!searchText.trim()) return data;
+    const lower = searchText.toLowerCase();
+
+    return data?.filter((item) => {
+      const formattedDateTime = item?.date_time
+        ? format(new Date(item.date_time), "dd-MM-yyyy")
+        : "";
+
+      const formattedExpireDate = item?.expire_date
+        ? format(new Date(item.expire_date), "dd-MM-yyyy")
+        : "";
+
+      return (
+        item?.mobile?.toLowerCase().includes(lower) ||
+        item?.type?.toLowerCase().includes(lower) ||
+        item?.remark?.toLowerCase().includes(lower) ||
+        item?.staff_name?.toLowerCase().includes(lower) ||
+        item?.points?.toString().includes(lower) ||
+        formattedDateTime.toLowerCase().includes(lower) ||
+        formattedExpireDate.toLowerCase().includes(lower)
+      );
+    });
+  }, [searchText, data]);
   // Table rendering is now inline in the return block below.
 
   return (
@@ -44,6 +70,17 @@ function formatToDate(dateTime) {
               <Text style={styles.close}>✕</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Search Field */}
+          <TextInput
+            placeholder="Search by mobile, type, or remark..."
+            style={styles.searchInput}
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholderTextColor="#999"
+          />
+
+
           {/* Table */}
           <View style={styles.tableWrapper}>
             {/* Table Header */}
@@ -58,8 +95,8 @@ function formatToDate(dateTime) {
             </View>
             {/* Table Data - scrollable */}
             <ScrollView style={styles.tableBodyScroll}>
-              {Array.isArray(data) && data.length > 0 ? (
-                data.map((item, idx) => (
+              {Array.isArray(filteredData) && filteredData.length > 0 ? (
+                filteredData.map((item, idx) => (
                   <View
                     key={idx}
                     style={[
@@ -95,6 +132,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#e5e5e5',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    margin: 16,
+    marginBottom: 0,
+    backgroundColor: '#fff',
   },
   modalContainer: {
     backgroundColor: '#fff',

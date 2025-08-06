@@ -20,6 +20,7 @@ import DropDown from '../../Components/DropDown';
 const Points = ({
   visible,
   onClose,
+  onBack,
   totalPoints,
   name,
   mobile,
@@ -181,7 +182,7 @@ const Points = ({
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
                   <Text style={{ fontSize: 12 }}>SUBMIT</Text>
                 </Button>
-                <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
+                <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onBack}>
                   <Text style={{ fontSize: 12 }}>BACK</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.close]} labelStyle={styles.actionLabel} onPress={onClose}>

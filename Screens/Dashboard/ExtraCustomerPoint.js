@@ -10,9 +10,6 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Portal } from 'react-native-paper';
-import ActivePoints from './ActivePoints';
-import RedeemPoints from './RedeemPoints';
-import ExpirePoints from './ExpirePoints';  
 const { width } = Dimensions.get('window');
 import { Divider } from 'react-native-paper';
 import { postRequest } from '../../Services/RequestServices';
@@ -22,6 +19,7 @@ const ExtraCustomerPoint = ({
   cusomerId,
   visible,
   onClose,
+  onBack,
   totalPoints,
   name,
   mobile,
@@ -148,7 +146,7 @@ const ExtraCustomerPoint = ({
                 <Button mode="contained" style={[styles.actionButton, styles.submit]} labelStyle={styles.actionLabel} onPress={handleSubmit}>
                   <Text style={{ fontSize: 12 }}>ADD POINTS</Text>
                 </Button>
-                <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onClose}>
+                <Button mode="contained" style={[styles.actionButton, styles.back]} labelStyle={styles.actionLabel} onPress={onBack}>
                   <Text style={{ fontSize: 12 }}>BACK</Text>
                 </Button>
                 <Button mode="contained" style={[styles.actionButton, styles.close]} labelStyle={styles.actionLabel} onPress={onClose}>
@@ -159,9 +157,6 @@ const ExtraCustomerPoint = ({
           </View>
         </Modal>
       </Portal>
-      <RedeemPoints visible={visibleRedeemPoints} onClose={() => setVisibleRedeemPoints(false)} data={redeemPoints} />
-      <ExpirePoints visible={visibleExpiredPoints} onClose={() => setVisibleExpiredPoints(false)} data={expiredPoints} />
-      <ActivePoints visible={visibleActivePoints} onClose={() => setVisibleActivePoints(false)} data={data} />
     </>
   );
 };

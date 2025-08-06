@@ -5,9 +5,10 @@ import moment from "moment";
 
 const CustomerRedeemModal = ({
   visible,
-  onClose,
+  onBack,
   redeem,
   customer,
+  onClose,
   totalPoints,
 }) => {
   const filteredRedeem = Array.isArray(redeem)
@@ -76,6 +77,15 @@ const CustomerRedeemModal = ({
         </DataTable>
 
         <View style={styles.footer}>
+        <Button
+            mode="contained"
+            color="#DC143C"
+            onPress={onBack}
+            compact
+            style={{ marginRight: 8 }}
+          >
+            Back
+          </Button>
           <Button
             mode="contained"
             color="#DC143C"
